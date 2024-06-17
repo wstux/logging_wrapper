@@ -21,8 +21,12 @@
 
 #include <cassert>
 #include <atomic>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
 
 #include "logging_wrapper/severity_level.h"
 
@@ -106,18 +110,96 @@ class manager final
 public:
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
 
+    template<typename TLogger>
+    static logger<TLogger> get_logger(const std::string& channel);
+
     static severity_level global_level() { return m_global_level; }
+
+    static void immutable_global_level() { m_immutable_global_level = true; }
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
     static void set_global_level(severity_level lvl);
 
+    static void set_logger_level(const std::string& channel, severity_level lvl);
+
 private:
+    using base_logger_t = details::base_logger;
     using severity_level_t = std::atomic<severity_level>;
+
+    struct logger_holder final
+    {
+        using ptr = std::shared_ptr<logger_holder>;
+        using map = std::unordered_map<std::string, logger_holder::ptr>;
+
+        explicit logger_holder(const std::string& ch, severity_level lvl)
+            : channel(ch)
+            , level(lvl)
+        {}
+
+        template<typename TLogger>
+        std::shared_ptr<TLogger> get_logger();
+
+        void set_level(severity_level lvl);
+
+        const std::string channel;
+        severity_level level;
+        base_logger_t::ptr p_base_logger;
+    };
+
+private:
+    static logger_holder::ptr register_logger(const std::string& channel, severity_level lvl = severity_level::debug);
 
 private:
     static severity_level_t m_global_level;
+    static std::atomic_bool m_immutable_global_level;
+
+    static std::recursive_mutex m_loggers_mutex;
+    static logger_holder::map m_loggers_map;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// class manager::logger_holder definition
+
+template<typename TLogger>
+std::shared_ptr<TLogger> manager::logger_holder::get_logger()
+{
+    using logger_impl_t = TLogger;
+    using logger_impl_ptr_t = typename logger_impl_t::ptr;
+
+    static_assert(std::is_base_of<base_logger_t, logger_impl_t>::value, "manager::logger_holder::get_logger: invalid TLogger type");
+
+    logger_impl_ptr_t p_logger;
+    if (! p_base_logger.get()) {
+        p_logger = std::make_shared<TLogger>(channel, level);
+        p_base_logger = p_logger;
+    } else {
+        assert(std::dynamic_pointer_cast<logger_impl_t>(p_base_logger) && "manager::get_logger: invalid pointer cast");
+        p_logger = std::static_pointer_cast<logger_impl_t>(p_base_logger);
+    }
+
+    return p_logger;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class manager definition
+
+template<typename TLogger>
+logger<TLogger> manager::get_logger(const std::string& channel)
+{
+    using logger_impl_t = details::logger_impl<TLogger>;
+
+    std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
+    logger_holder::map::iterator it = m_loggers_map.find(channel);
+
+    logger_holder::ptr p_holder;
+    if (it == m_loggers_map.end()) {
+        p_holder = register_logger(channel);
+    } else {
+        p_holder = it->second;
+    }
+    return logger<TLogger>(p_holder->get_logger<logger_impl_t>());
+}
 
 } // namespace logging
 } // namespace wstux
