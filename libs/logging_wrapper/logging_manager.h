@@ -21,12 +21,85 @@
 
 #include <cassert>
 #include <atomic>
+#include <memory>
 #include <string>
 
 #include "logging_wrapper/severity_level.h"
 
 namespace wstux {
 namespace logging {
+namespace details {
+
+////////////////////////////////////////////////////////////////////////////////
+// struct base_logger
+
+struct base_logger
+{
+    using ptr = std::shared_ptr<base_logger>;
+
+    virtual ~base_logger() {}
+
+    inline bool can_log(severity_level lvl) const { return level >= lvl; }
+
+    const std::string channel;
+    severity_level level;
+
+protected:
+    base_logger(const std::string& ch, const severity_level lvl)
+        : channel(ch)
+        , level(lvl)
+    {}
+
+private:
+    base_logger(const base_logger&);
+    base_logger& operator=(const base_logger&);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// struct logger_impl
+
+template<typename TLogger>
+struct logger_impl final : public base_logger
+{
+    using base = base_logger;
+    using logger_type = TLogger;
+    using make_logger_fn_t = std::function<TLogger(const std::string&)>;
+    using ptr = std::shared_ptr<base_logger>;
+
+    logger_impl(const std::string& channel, severity_level lvl)
+        : base(channel, lvl)
+        , logger(make_logger_fn(channel))
+    {}
+
+    virtual ~logger_impl() {}
+
+    logger_type logger;
+
+    static make_logger_fn_t make_logger_fn;
+};
+
+template<typename TLogger>
+typename logger_impl<TLogger>::make_logger_fn_t logger_impl<TLogger>::make_logger_fn = [] (const std::string& c) -> TLogger { return TLogger(c); };
+
+} // namespace details
+
+////////////////////////////////////////////////////////////////////////////////
+// struct logger
+
+template<typename TLogger>
+struct logger final
+{
+    using logger_impl_ptr_t = typename details::logger_impl<TLogger>::ptr;
+
+    explicit logger(logger_impl_ptr_t logger)
+        : logger_impl(logger)
+    {}
+
+    logger_impl_ptr_t logger_impl;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class manager
 
 class manager final
 {
