@@ -39,6 +39,7 @@ namespace details {
 
 struct base_logger
 {
+    using severity_level_t = std::atomic<severity_level>;
     using ptr = std::shared_ptr<base_logger>;
 
     virtual ~base_logger() {}
@@ -46,7 +47,7 @@ struct base_logger
     inline bool can_log(severity_level lvl) const { return level >= lvl; }
 
     const std::string channel;
-    severity_level level;
+    severity_level_t level;
 
 protected:
     base_logger(const std::string& ch, const severity_level lvl)
@@ -68,7 +69,7 @@ struct logger_impl final : public base_logger
     using base = base_logger;
     using logger_type = TLogger;
     using make_logger_fn_t = std::function<TLogger(const std::string&)>;
-    using ptr = std::shared_ptr<base_logger>;
+    using ptr = std::shared_ptr<logger_impl>;
 
     logger_impl(const std::string& channel, severity_level lvl)
         : base(channel, lvl)
@@ -85,6 +86,13 @@ struct logger_impl final : public base_logger
 template<typename TLogger>
 typename logger_impl<TLogger>::make_logger_fn_t logger_impl<TLogger>::make_logger_fn = [] (const std::string& c) -> TLogger { return TLogger(c); };
 
+////////////////////////////////////////////////////////////////////////////////
+// free functions
+
+int timestamp(char* buf, size_t size);
+
+std::string timestamp();
+
 } // namespace details
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,13 +101,20 @@ typename logger_impl<TLogger>::make_logger_fn_t logger_impl<TLogger>::make_logge
 template<typename TLogger>
 struct logger final
 {
-    using logger_impl_ptr_t = typename details::logger_impl<TLogger>::ptr;
+    using logger_impl_t = details::logger_impl<TLogger>;
+    using logger_type = TLogger;
 
-    explicit logger(logger_impl_ptr_t logger)
-        : logger_impl(logger)
+    explicit logger(typename logger_impl_t::ptr p_logger)
+        : p_logger_impl(p_logger)
     {}
 
-    logger_impl_ptr_t logger_impl;
+    bool can_log(severity_level lvl) const { return p_logger_impl->can_log(lvl); }
+
+    const std::string& channel() const { return p_logger_impl->channel; }
+
+    logger_type& get_logger() { return p_logger_impl->logger; }
+
+    typename logger_impl_t::ptr p_logger_impl;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +124,8 @@ class manager final
 {
 public:
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
+
+    static void clear();
 
     template<typename TLogger>
     static logger<TLogger> get_logger(const std::string& channel);
@@ -165,13 +182,13 @@ template<typename TLogger>
 std::shared_ptr<TLogger> manager::logger_holder::get_logger()
 {
     using logger_impl_t = TLogger;
-    using logger_impl_ptr_t = typename logger_impl_t::ptr;
 
     static_assert(std::is_base_of<base_logger_t, logger_impl_t>::value, "manager::logger_holder::get_logger: invalid TLogger type");
+    static_assert(! std::is_same<base_logger_t, logger_impl_t>::value, "manager::logger_holder::get_logger: invalid TLogger type");
 
-    logger_impl_ptr_t p_logger;
+    std::shared_ptr<logger_impl_t> p_logger;
     if (! p_base_logger.get()) {
-        p_logger = std::make_shared<TLogger>(channel, level);
+        p_logger = std::make_shared<logger_impl_t>(channel, level);
         p_base_logger = p_logger;
     } else {
         assert(std::dynamic_pointer_cast<logger_impl_t>(p_base_logger) && "manager::get_logger: invalid pointer cast");
