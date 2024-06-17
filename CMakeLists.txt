@@ -23,6 +23,6 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 ################################################################################
 
 add_subdirectory(externals)
-#add_subdirectory(libs/logging_wrapper)
+add_subdirectory(libs/logging_wrapper)
 #add_subdirectory(tests)
 
