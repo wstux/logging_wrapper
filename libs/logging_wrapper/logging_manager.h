@@ -95,18 +95,29 @@ std::string timestamp();
 
 } // namespace details
 
+class manager;
+
 ////////////////////////////////////////////////////////////////////////////////
 // struct logger
 
+/**
+ *  \brief  The wrapper around abstract logger.
+ *  \details    The wrapper stores any type of logger.The wrapper does not
+ *              distinguish between logger types and can work with both
+ *              stream-like and printf-like loggers.
+ *
+ *  \code
+ *      logger<logger_t> logger = manager::get_logger<logger_t>("Root");
+ *      LOG_INFO(logger, "message");
+ *  \endcode
+ */
 template<typename TLogger>
 struct logger final
 {
+    friend manager;
+
     using logger_impl_t = details::logger_impl<TLogger>;
     using logger_type = TLogger;
-
-    explicit logger(typename logger_impl_t::ptr p_logger)
-        : p_logger_impl(p_logger)
-    {}
 
     bool can_log(severity_level lvl) const { return p_logger_impl->can_log(lvl); }
 
@@ -115,11 +126,23 @@ struct logger final
     logger_type& get_logger() { return p_logger_impl->logger; }
 
     typename logger_impl_t::ptr p_logger_impl;
+
+private:
+    explicit logger(typename logger_impl_t::ptr p_logger)
+        : p_logger_impl(p_logger)
+    {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // class manager
 
+/**
+ *  \brief  Logger manager. Provides access to all registered loggers.
+ *  \details
+ *
+ *  \code
+ *  \endcode
+ */
 class manager final
 {
 public:
@@ -133,6 +156,9 @@ public:
     static severity_level global_level() { return m_global_level; }
 
     static void immutable_global_level() { m_immutable_global_level = true; }
+
+    template<typename TLogger>
+    static void init(const std::function<TLogger(const std::string&)>& make_logger_fn);
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
@@ -216,6 +242,12 @@ logger<TLogger> manager::get_logger(const std::string& channel)
         p_holder = it->second;
     }
     return logger<TLogger>(p_holder->get_logger<logger_impl_t>());
+}
+
+template<typename TLogger>
+void manager::init(const std::function<TLogger(const std::string&)>& make_logger_fn)
+{
+    details::logger_impl<TLogger>::make_logger_fn = make_logger_fn;
 }
 
 } // namespace logging

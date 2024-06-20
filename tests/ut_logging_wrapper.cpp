@@ -42,49 +42,88 @@ struct test_logger final
     std::stringstream str_logger;
 };
 
+bool is_equal_logs(const std::string& ethalon, const std::string& log)
+{
+    if (ethalon.size() != log.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < ethalon.size(); ++i) {
+        if (ethalon[i] != '*' && ethalon[i] != log[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // <anonymous> namespace
 
 TEST(logging_cpp, logging)
 {
-    using root_logger_t = ::wstux::logging::logger<test_logger>;
+    using logger_t = ::wstux::logging::logger<test_logger>;
 
     ::wstux::logging::manager::clear();
-    root_logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     LOG_ERROR(root_logger, "error log, logging");
 
-    const std::string ethalon_example = "1970-01-01 00:00:00.000 [ERROR] error log, logging\n";
-    const std::string ethalon = "[ERROR] error log, logging\n";
-    std::string str = root_logger.get_logger().str_logger.str();
-    ASSERT_TRUE(str.size() == ethalon_example.size()) << str.size() << " != " << ethalon_example.size();
-    EXPECT_TRUE(str.substr(24) == ethalon) << "'" << str.substr(24) << "' != '" << ethalon << "'";
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] error log, logging\n";
+    const std::string log = root_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
 TEST(logging_cpp, severity_level)
 {
-    using root_logger_t = ::wstux::logging::logger<test_logger>;
+    using logger_t = ::wstux::logging::logger<test_logger>;
 
     ::wstux::logging::manager::clear();
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
-    root_logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     LOG_ERROR(root_logger, "error log");
     LOG_CRIT(root_logger, "crit log");
 
-    std::string ethalon_example = "1970-01-01 00:00:00.000 [CRIT ] crit log\n";
-    std::string ethalon = "[CRIT ] crit log\n";
-    std::string str = root_logger.get_logger().str_logger.str();
-    ASSERT_TRUE(str.size() == ethalon_example.size()) << str.size() << " != " << ethalon_example.size();
-    EXPECT_TRUE(str.substr(24) == ethalon) << "'" << str.substr(24) << "' != '" << ethalon << "'";
+    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] crit log\n";
+    std::string log = root_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::info);
     LOG_ERROR(root_logger, "error log");
-    ethalon_example = "1970-01-01 00:00:00.000 [CRIT ] crit log\n"
-                      "1970-01-01 00:00:00.000 [ERROR] error log\n";
-    ethalon = "[CRIT ] crit log\n";
-    str = root_logger.get_logger().str_logger.str();
-    ASSERT_TRUE(str.size() == ethalon_example.size()) << str.size() << " != " << ethalon_example.size();
-    EXPECT_TRUE(str.substr(24, 17) == ethalon) << "'" << str.substr(24, 17) << "' != '" << ethalon << "'";
-    ethalon = "[ERROR] error log\n";
-    EXPECT_TRUE(str.substr(65, 18) == ethalon) << "'" << str.substr(65, 18) << "' != '" << ethalon << "'";
+    ethalon = "****-**-** **:**:**.*** [CRIT ] crit log\n"
+              "****-**-** **:**:**.*** [ERROR] error log\n";
+    log = root_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
+TEST(logging_cpp, channels)
+{
+    using logger_t = ::wstux::logging::logger<test_logger>;
+
+    ::wstux::logging::manager::clear();
+    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
+    logger_t chan_logger = ::wstux::logging::manager::get_logger<test_logger>("Channel");
+    ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
+
+    ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
+    ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::error);
+    LOG_INFO(root_logger, "Root: info log");
+    LOG_INFO(chan_logger, "Channel: info log");
+    LOG_ERROR(root_logger, "Root: error log");
+    LOG_ERROR(chan_logger, "Channel: error log");
+
+    ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::crit);
+    ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::crit);
+    LOG_ERROR(root_logger, "Root: error log");
+    LOG_ERROR(chan_logger, "Channel: error log");
+    LOG_CRIT(root_logger, "Root: crit log");
+    LOG_CRIT(chan_logger, "Channel: crit log");
+
+    const std::string ethalon_root = "****-**-** **:**:**.*** [INFO ] Root: info log\n"
+                                     "****-**-** **:**:**.*** [ERROR] Root: error log\n"
+                                     "****-**-** **:**:**.*** [CRIT ] Root: crit log\n";
+    const std::string ethalon_chan = "****-**-** **:**:**.*** [ERROR] Channel: error log\n"
+                                     "****-**-** **:**:**.*** [CRIT ] Channel: crit log\n";
+    const std::string log_root = root_logger.get_logger().str_logger.str();
+    const std::string log_chan = chan_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon_root, log_root)) << "'" << ethalon_root << "' != '" << log_root << "'";
+    EXPECT_TRUE(is_equal_logs(ethalon_chan, log_chan)) << "'" << ethalon_chan << "' != '" << log_chan << "'";
 }
 
 int main(int /*argc*/, char** /*argv*/)
