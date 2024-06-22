@@ -16,26 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
+#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
+#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
 
 #include "logging_wrapper/logging_manager.h"
 #include "logging_wrapper/severity_level.h"
 
-#if ! defined(LOGGINGC_WRAPPER_IMPL)
-    #define LOGGINGC_WRAPPER_IMPL(logger, level)                            \
-        logger << ::wstux::logging::details::timestamp() << " " << _LOGC_LEVEL(level) << " " 
+#if ! defined(LOGGINGF_WRAPPER_IMPL)
+    #define LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                  \
+        char cur_ts[24];                                                    \
+        ::wstux::logging::details::timestamp(cur_ts, 24);                   \
+        logger.log("%s " _LOGF_LEVEL(level) " " fmt "\n", cur_ts __VA_OPT__(,) __VA_ARGS__)
 #endif
 
-#define _LOGC(logger, level, VARS)                                          \
+#define _LOGF(logger, level, fmt, ...)                                      \
     do {                                                                    \
         if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
             ! logger.can_log(_LOG_LEVEL(level))) {                          \
             break;                                                          \
         }                                                                   \
-        LOGGINGC_WRAPPER_IMPL(logger.get_logger(), level) << VARS << std::endl; \
+        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, fmt, __VA_ARGS__); \
     }                                                                       \
     while (0)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_ */
+#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_ */
 
