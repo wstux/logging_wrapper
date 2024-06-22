@@ -29,8 +29,8 @@
 
 #define _LOGC(logger, level, VARS)                                          \
     do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_LOGC_LEVEL(level)) ||     \
-            ! logger.can_log(_LOGC_LEVEL(level))) {                         \
+        if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
+            ! logger.can_log(_LOG_LEVEL(level))) {                          \
             break;                                                          \
         }                                                                   \
         LOGGINGC_WRAPPER_IMPL(logger.get_logger(), level) << VARS << std::endl; \
