@@ -86,7 +86,7 @@ TEST(logging_cpp, logging)
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
 
-    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] error log 42\n";
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     const std::string log = root_logger.get_logger().str_logger.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
@@ -101,14 +101,14 @@ TEST(logging_cpp, severity_level)
     LOG_ERROR(root_logger, "error log " << 42);
     LOG_CRIT(root_logger, "crit log " << 42);
 
-    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] crit log 42\n";
+    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
     std::string log = root_logger.get_logger().str_logger.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::info);
     LOG_ERROR(root_logger, "error log " << 42);
-    ethalon = "****-**-** **:**:**.*** [CRIT ] crit log 42\n"
-              "****-**-** **:**:**.*** [ERROR] error log 42\n";
+    ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n"
+              "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     log = root_logger.get_logger().str_logger.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
@@ -124,17 +124,17 @@ TEST(logging_cpp, channels)
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::error);
-    LOG_INFO(root_logger, "Root: info log " << 42);
-    LOG_INFO(chan_logger, "Channel: info log " << 42);
-    LOG_ERROR(root_logger, "Root: error log " << 42);
-    LOG_ERROR(chan_logger, "Channel: error log " << 42);
+    LOG_INFO(root_logger, "info log " << 42);
+    LOG_INFO(chan_logger, "info log " << 42);
+    LOG_ERROR(root_logger, "error log " << 42);
+    LOG_ERROR(chan_logger, "error log " << 42);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::crit);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::crit);
-    LOG_ERROR(root_logger, "Root: error log " << 42);
-    LOG_ERROR(chan_logger, "Channel: error log " << 42);
-    LOG_CRIT(root_logger, "Root: crit log " << 42);
-    LOG_CRIT(chan_logger, "Channel: crit log " << 42);
+    LOG_ERROR(root_logger, "error log " << 42);
+    LOG_ERROR(chan_logger, "error log " << 42);
+    LOG_CRIT(root_logger, "crit log " << 42);
+    LOG_CRIT(chan_logger, "crit log " << 42);
 
     const std::string ethalon_root = "****-**-** **:**:**.*** [INFO ] Root: info log 42\n"
                                      "****-**-** **:**:**.*** [ERROR] Root: error log 42\n"
@@ -155,7 +155,7 @@ TEST(loggingf, logging)
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
-    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] error log, 42\n";
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
     const std::string log = root_logger.get_logger().str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
@@ -170,14 +170,14 @@ TEST(loggingf, severity_level)
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
 
-    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] crit log 42\n";
+    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
     std::string log = root_logger.get_logger().str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::info);
     LOGF_ERROR(root_logger, "error log %d", 42);
-    ethalon = "****-**-** **:**:**.*** [CRIT ] crit log 42\n"
-              "****-**-** **:**:**.*** [ERROR] error log 42\n";
+    ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n"
+              "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     log = root_logger.get_logger().str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
@@ -193,17 +193,17 @@ TEST(loggingf, channels)
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::error);
-    LOGF_INFO(root_logger, "Root: info log %d", 42);
-    LOGF_INFO(chan_logger, "Channel: info log %d", 42);
-    LOGF_ERROR(root_logger, "Root: error log %d", 42);
-    LOGF_ERROR(chan_logger, "Channel: error log %d", 42);
+    LOGF_INFO(root_logger, "info log %d", 42);
+    LOGF_INFO(chan_logger, "info log %d", 42);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::crit);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::crit);
-    LOGF_ERROR(root_logger, "Root: error log %d", 42);
-    LOGF_ERROR(chan_logger, "Channel: error log %d", 42);
-    LOGF_CRIT(root_logger, "Root: crit log %d", 42);
-    LOGF_CRIT(chan_logger, "Channel: crit log %d", 42);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
+    LOGF_CRIT(root_logger, "crit log %d", 42);
+    LOGF_CRIT(chan_logger, "crit log %d", 42);
 
     const std::string ethalon_root = "****-**-** **:**:**.*** [INFO ] Root: info log 42\n"
                                      "****-**-** **:**:**.*** [ERROR] Root: error log 42\n"
@@ -228,17 +228,17 @@ TEST(logging, combo_loggers)
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::error);
-    LOG_INFO(root_logger, "Root: info log " << 42);
-    LOGF_INFO(chan_logger, "Channel: info log %d", 42);
-    LOG_ERROR(root_logger, "Root: error log " << 42);
-    LOGF_ERROR(chan_logger, "Channel: error log %d", 42);
+    LOG_INFO(root_logger, "info log " << 42);
+    LOGF_INFO(chan_logger, "info log %d", 42);
+    LOG_ERROR(root_logger, "error log " << 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::crit);
     ::wstux::logging::manager::set_logger_level("Channel", ::wstux::logging::severity_level::crit);
-    LOG_ERROR(root_logger, "Root: error log " << 42);
-    LOGF_ERROR(chan_logger, "Channel: error log %d", 42);
-    LOG_CRIT(root_logger, "Root: crit log " << 42);
-    LOGF_CRIT(chan_logger, "Channel: crit log %d", 42);
+    LOG_ERROR(root_logger, "error log " << 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
+    LOG_CRIT(root_logger, "crit log " << 42);
+    LOGF_CRIT(chan_logger, "crit log %d", 42);
 
     const std::string ethalon_root = "****-**-** **:**:**.*** [INFO ] Root: info log 42\n"
                                      "****-**-** **:**:**.*** [ERROR] Root: error log 42\n"
