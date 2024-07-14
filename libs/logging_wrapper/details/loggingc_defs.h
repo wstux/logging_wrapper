@@ -22,9 +22,13 @@
 #include "logging_wrapper/logging_manager.h"
 #include "logging_wrapper/severity_level.h"
 
-#if ! defined(LOGGINGC_WRAPPER_IMPL)
-    #define LOGGINGC_WRAPPER_IMPL(logger, level)                            \
-        logger << ::wstux::logging::details::timestamp() << " " << _LOGC_LEVEL(level) << " " 
+#if defined(LOGGINGC_WRAPPER_IMPL)
+    #define _LOGGINGC_WRAPPER_IMPL(logger, level)                           \
+        LOGGINGC_WRAPPER_IMPL(logger.get_logger(), level)
+#else
+    #define _LOGGINGC_WRAPPER_IMPL(logger, level)                           \
+        logger.get_logger() << ::wstux::logging::details::timestamp() << " "\
+                            << _LOGC_LEVEL(level) << " " << logger.channel() << ": "
 #endif
 
 #define _LOGC(logger, level, VARS)                                          \
@@ -33,7 +37,7 @@
             ! logger.can_log(_LOG_LEVEL(level))) {                          \
             break;                                                          \
         }                                                                   \
-        LOGGINGC_WRAPPER_IMPL(logger.get_logger(), level) << VARS << std::endl; \
+        _LOGGINGC_WRAPPER_IMPL(logger, level) << VARS << std::endl;         \
     }                                                                       \
     while (0)
 

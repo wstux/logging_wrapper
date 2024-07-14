@@ -22,11 +22,15 @@
 #include "logging_wrapper/logging_manager.h"
 #include "logging_wrapper/severity_level.h"
 
-#if ! defined(LOGGINGF_WRAPPER_IMPL)
-    #define LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                  \
+#if defined(LOGGINGF_WRAPPER_IMPL)
+    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
+        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, __VA_ARGS__)
+#else
+    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
         ::wstux::logging::details::timestamp(cur_ts, 24);                   \
-        logger.log("%s " _LOGF_LEVEL(level) " " fmt "\n", cur_ts __VA_OPT__(,) __VA_ARGS__)
+        logger.get_logger().log("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",  \
+                                cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 #define _LOGF(logger, level, fmt, ...)                                      \
@@ -35,7 +39,7 @@
             ! logger.can_log(_LOG_LEVEL(level))) {                          \
             break;                                                          \
         }                                                                   \
-        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, fmt, __VA_ARGS__); \
+        _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \
     }                                                                       \
     while (0)
 
