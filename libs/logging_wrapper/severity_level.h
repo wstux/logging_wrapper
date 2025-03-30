@@ -104,8 +104,6 @@ inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, 
 } // namespace logging
 } // namespace wstux
 
-#define _LOGC_LEVEL(level)      ((::wstux::logging::severity_level)level)
-
 #define _LOG_LEVEL(level)       ((::wstux::logging::severity_level)level)
 
 #endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */

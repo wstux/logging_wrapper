@@ -20,7 +20,7 @@
 #define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGING_H_
 
 #include "logging_wrapper/severity_level.h"
-#include "logging_wrapper/details/loggingc_defs.h"
+#include "logging_wrapper/details/logging_defs.h"
 #include "logging_wrapper/details/loggingf_defs.h"
 
 #define LOGF_EMERG(logger, fmt, ...)        _LOGF(logger, LVL_EMERG,  fmt, __VA_ARGS__)
@@ -33,15 +33,15 @@
 #define LOGF_DEBUG(logger, fmt, ...)        _LOGF(logger, LVL_DEBUG,  fmt, __VA_ARGS__)
 #define LOGF_TRACE(logger, fmt, ...)        _LOGF(logger, LVL_TRACE,  fmt, __VA_ARGS__)
 
-#define LOG_EMERG(logger, VARS)             _LOGC(logger, LVL_EMERG,  VARS)
-#define LOG_FATAL(logger, VARS)             _LOGC(logger, LVL_FATAL,  VARS)
-#define LOG_CRIT(logger, VARS)              _LOGC(logger, LVL_CRIT,   VARS)
-#define LOG_ERROR(logger, VARS)             _LOGC(logger, LVL_ERROR,  VARS)
-#define LOG_WARN(logger, VARS)              _LOGC(logger, LVL_WARN,   VARS)
-#define LOG_NOTICE(logger, VARS)            _LOGC(logger, LVL_NOTICE, VARS)
-#define LOG_INFO(logger, VARS)              _LOGC(logger, LVL_INFO,   VARS)
-#define LOG_DEBUG(logger, VARS)             _LOGC(logger, LVL_DEBUG,  VARS)
-#define LOG_TRACE(logger, VARS)             _LOGC(logger, LVL_TRACE,  VARS)
+#define LOG_EMERG(logger, VARS)             _LOG(logger, LVL_EMERG,  VARS)
+#define LOG_FATAL(logger, VARS)             _LOG(logger, LVL_FATAL,  VARS)
+#define LOG_CRIT(logger, VARS)              _LOG(logger, LVL_CRIT,   VARS)
+#define LOG_ERROR(logger, VARS)             _LOG(logger, LVL_ERROR,  VARS)
+#define LOG_WARN(logger, VARS)              _LOG(logger, LVL_WARN,   VARS)
+#define LOG_NOTICE(logger, VARS)            _LOG(logger, LVL_NOTICE, VARS)
+#define LOG_INFO(logger, VARS)              _LOG(logger, LVL_INFO,   VARS)
+#define LOG_DEBUG(logger, VARS)             _LOG(logger, LVL_DEBUG,  VARS)
+#define LOG_TRACE(logger, VARS)             _LOG(logger, LVL_TRACE,  VARS)
 
 #endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGING_H_ */
 
