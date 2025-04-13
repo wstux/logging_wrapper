@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.10)
 
 project(logging_wrapper
         VERSION 0.0.1
-        LANGUAGES CXX)
+        LANGUAGES CXX C)
 
 ################################################################################
 # Init cmake modules path
@@ -24,5 +24,6 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 
 add_subdirectory(externals)
 add_subdirectory(libs/logging_wrapper)
+add_subdirectory(libs/loggingf_wrapper)
 add_subdirectory(tests)
 
