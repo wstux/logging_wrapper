@@ -1,6 +1,6 @@
 /*
  * logging_wrapper
- * Copyright (C) 2024  Chistyakov Alexander
+ * Copyright (C) 2025  Chistyakov Alexander
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
-#define _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
+#ifndef _LIBS_LOGGINGF_WRAPPER_LOGGINGF_DEFS_H_
+#define _LIBS_LOGGINGF_WRAPPER_LOGGINGF_DEFS_H_
 
-#include "logging_wrapper/manager.h"
-#include "logging_wrapper/severity_level.h"
+#include "loggingf_wrapper/manager.h"
+#include "loggingf_wrapper/severity_level.h"
 
 #if defined(LOGGINGF_WRAPPER_IMPL)
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, __VA_ARGS__)
+        LOGGINGF_WRAPPER_IMPL(logger->p_logger, level, __VA_ARGS__)
 #else
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
-        ::wstux::logging::details::timestamp(cur_ts, 24);                   \
-        logger.get_logger()("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",      \
-                            cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
+        timestamp(cur_ts, 24);                                              \
+        logger->p_logger("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",         \
+                                cur_ts, logger->channel __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 #define _LOGF(logger, level, fmt, ...)                                      \
     do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
-            ! logger.can_log(_LOG_LEVEL(level))) {                          \
+        if (! can_log(level) || ! can_channel_log(logger, level)) {   \
             break;                                                          \
         }                                                                   \
         _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \
     }                                                                       \
     while (0)
 
-#endif /* _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_ */
+#endif /* _LIBS_LOGGINGF_WRAPPER_LOGGINGF_DEFS_H_ */
 

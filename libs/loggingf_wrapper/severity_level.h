@@ -1,6 +1,6 @@
 /*
  * logging_wrapper
- * Copyright (C) 2024  Chistyakov Alexander
+ * Copyright (C) 2025  Chistyakov Alexander
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
-#define _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
+#ifndef _LIBS_LOGGINGF_WRAPPER_SEVERITY_LEVEL_H_
+#define _LIBS_LOGGINGF_WRAPPER_SEVERITY_LEVEL_H_
 
-#include <cassert>
-
-#include <array>
-#include <iomanip>
-#include <ostream>
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* 
  * Implementations of log levels.
@@ -64,12 +62,7 @@
 
 #define _LOGF_LEVEL(level)      _IMPL_LOGF_LVL_ ## level
 
-/**
- */
-namespace wstux {
-namespace logging {
-
-enum severity_level : uint8_t
+enum severity_level
 {
     emerg   = 0,
     fatal   = 1,
@@ -82,30 +75,8 @@ enum severity_level : uint8_t
     trace   = 8
 };
 
-template<typename TChar, typename TTraits>
-inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& stream, const severity_level lvl)
-{
-    static const std::array<const char*, 9> severities = {
-        "[EMERG]",
-        "[FATAL]",
-        "[CRIT ]",
-        "[ERROR]",
-        "[WARN ]",
-        "[NOTIC]",
-        "[INFO ]",
-        "[DEBUG]",
-        "[TRACE]"
-    };
-
-    assert(severities.size() > static_cast<std::size_t>(lvl) && "severity level to stream conversion failed - out of bounds");
-    stream << std::setw(7) << std::left << severities[static_cast<std::size_t>(lvl)];
-    return stream;
+#if defined(__cplusplus)
 }
+#endif
 
-} // namespace logging
-} // namespace wstux
-
-#define _LOG_LEVEL(level)       ((::wstux::logging::severity_level)level)
-
-#endif /* _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */
-
+#endif /* _LIBS_LOGGINGF_WRAPPER_SEVERITY_LEVEL_H_ */

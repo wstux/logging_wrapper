@@ -9,3 +9,12 @@ TestTarget(ut_logging_wrapper
         testing
 )
 
+TestTarget(ut_loggingf_wrapper
+    SOURCES
+        ut_loggingf_wrapper.cpp
+    LIBRARIES
+        loggingf_wrapper
+    DEPENDS
+        testing
+)
+

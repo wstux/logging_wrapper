@@ -1,6 +1,6 @@
 /*
  * logging_wrapper
- * Copyright (C) 2024  Chistyakov Alexander
+ * Copyright (C) 2025  Chistyakov Alexander
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LIBS_LOGGING_WRAPPER_LOGGING_H_
-#define _LIBS_LOGGING_WRAPPER_LOGGING_H_
+#ifndef _LIBS_LOGGINGF_WRAPPER_LOGGING_H_
+#define _LIBS_LOGGINGF_WRAPPER_LOGGING_H_
 
-#include "logging_wrapper/severity_level.h"
-#include "logging_wrapper/details/logging_defs.h"
-#include "logging_wrapper/details/loggingf_defs.h"
+#include "loggingf_wrapper/severity_level.h"
+#include "loggingf_wrapper/details/loggingf_defs.h"
 
 #define LOGF_EMERG(logger, fmt, ...)        _LOGF(logger, LVL_EMERG,  fmt, __VA_ARGS__)
 #define LOGF_FATAL(logger, fmt, ...)        _LOGF(logger, LVL_FATAL,  fmt, __VA_ARGS__)
@@ -33,15 +32,5 @@
 #define LOGF_DEBUG(logger, fmt, ...)        _LOGF(logger, LVL_DEBUG,  fmt, __VA_ARGS__)
 #define LOGF_TRACE(logger, fmt, ...)        _LOGF(logger, LVL_TRACE,  fmt, __VA_ARGS__)
 
-#define LOG_EMERG(logger, VARS)             _LOG(logger, LVL_EMERG,  VARS)
-#define LOG_FATAL(logger, VARS)             _LOG(logger, LVL_FATAL,  VARS)
-#define LOG_CRIT(logger, VARS)              _LOG(logger, LVL_CRIT,   VARS)
-#define LOG_ERROR(logger, VARS)             _LOG(logger, LVL_ERROR,  VARS)
-#define LOG_WARN(logger, VARS)              _LOG(logger, LVL_WARN,   VARS)
-#define LOG_NOTICE(logger, VARS)            _LOG(logger, LVL_NOTICE, VARS)
-#define LOG_INFO(logger, VARS)              _LOG(logger, LVL_INFO,   VARS)
-#define LOG_DEBUG(logger, VARS)             _LOG(logger, LVL_DEBUG,  VARS)
-#define LOG_TRACE(logger, VARS)             _LOG(logger, LVL_TRACE,  VARS)
-
-#endif /* _LIBS_LOGGING_WRAPPER_LOGGING_H_ */
+#endif /* _LIBS_LOGGINGF_WRAPPER_LOGGING_H_ */
 

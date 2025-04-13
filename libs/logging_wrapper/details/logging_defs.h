@@ -16,30 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
+#ifndef _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_
+#define _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_
 
-#include "logging_wrapper/logging_manager.h"
+#include "logging_wrapper/manager.h"
 #include "logging_wrapper/severity_level.h"
 
-#if defined(LOGGINGC_WRAPPER_IMPL)
-    #define _LOGGINGC_WRAPPER_IMPL(logger, level)                           \
-        LOGGINGC_WRAPPER_IMPL(logger.get_logger(), level)
+#if defined(LOGGING_WRAPPER_IMPL)
+    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
+        LOGGING_WRAPPER_IMPL(logger.get_logger(), level)
 #else
-    #define _LOGGINGC_WRAPPER_IMPL(logger, level)                           \
+    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
         logger.get_logger() << ::wstux::logging::details::timestamp() << " "\
-                            << _LOGC_LEVEL(level) << " " << logger.channel() << ": "
+                            << _LOG_LEVEL(level) << " " << logger.channel() \
+                            << ": "
 #endif
 
-#define _LOGC(logger, level, VARS)                                          \
+#define _LOG(logger, level, VARS)                                           \
     do {                                                                    \
         if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
             ! logger.can_log(_LOG_LEVEL(level))) {                          \
             break;                                                          \
         }                                                                   \
-        _LOGGINGC_WRAPPER_IMPL(logger, level) << VARS << std::endl;         \
+        _LOGGING_WRAPPER_IMPL(logger, level) << VARS << std::endl;          \
     }                                                                       \
     while (0)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_ */
 

@@ -16,10 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_MANAGER_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_MANAGER_H_
+#ifndef _LIBS_LOGGING_WRAPPER_MANAGER_H_
+#define _LIBS_LOGGING_WRAPPER_MANAGER_H_
 
-#include <cassert>
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -155,8 +154,6 @@ public:
 
     static severity_level global_level() { return m_global_level; }
 
-    static void immutable_global_level() { m_immutable_global_level = true; }
-
     template<typename TLogger>
     static void init(const std::function<TLogger(const std::string&)>& make_logger_fn);
 
@@ -195,7 +192,6 @@ private:
 
 private:
     static severity_level_t m_global_level;
-    static std::atomic_bool m_immutable_global_level;
 
     static std::recursive_mutex m_loggers_mutex;
     static logger_holder::map m_loggers_map;
@@ -253,5 +249,5 @@ void manager::init(const std::function<TLogger(const std::string&)>& make_logger
 } // namespace logging
 } // namespace wstux
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_MANAGER_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
 
