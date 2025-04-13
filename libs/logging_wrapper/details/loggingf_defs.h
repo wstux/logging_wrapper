@@ -19,7 +19,7 @@
 #ifndef _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
 #define _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
 
-#include "logging_wrapper/logging_manager.h"
+#include "logging_wrapper/manager.h"
 #include "logging_wrapper/severity_level.h"
 
 #if defined(LOGGINGF_WRAPPER_IMPL)

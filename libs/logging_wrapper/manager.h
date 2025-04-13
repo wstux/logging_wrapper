@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LIBS_LOGGING_WRAPPER_LOGGING_MANAGER_H_
-#define _LIBS_LOGGING_WRAPPER_LOGGING_MANAGER_H_
+#ifndef _LIBS_LOGGING_WRAPPER_MANAGER_H_
+#define _LIBS_LOGGING_WRAPPER_MANAGER_H_
 
 #include <atomic>
 #include <functional>
@@ -249,5 +249,5 @@ void manager::init(const std::function<TLogger(const std::string&)>& make_logger
 } // namespace logging
 } // namespace wstux
 
-#endif /* _LIBS_LOGGING_WRAPPER_LOGGING_MANAGER_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
 

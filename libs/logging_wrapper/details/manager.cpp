@@ -20,7 +20,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "logging_wrapper/logging_manager.h"
+#include "logging_wrapper/manager.h"
 
 #define TS_FILL_DFL(ts_buf, buf_size)                               \
     memcpy(ts_buf, "yyyy-MM-dd hh:mm:ss.mil", (buf_size < 24) ? buf_size : 24)
