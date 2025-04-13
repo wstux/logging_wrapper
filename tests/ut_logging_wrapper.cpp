@@ -46,7 +46,7 @@ struct test_loggerf final
 {
     test_loggerf(const std::string&) {}
 
-    void log(const char* p_fmt, ...)
+    void operator()(const char* p_fmt, ...)
     {
         va_list args;
         va_start(args, p_fmt);

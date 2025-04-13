@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
+#ifndef _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
+#define _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
 
 #include <cassert>
 
@@ -69,7 +69,8 @@
 namespace wstux {
 namespace logging {
 
-enum severity_level : uint8_t {
+enum severity_level : uint8_t
+{
     emerg   = 0,
     fatal   = 1,
     crit    = 2,
@@ -106,5 +107,5 @@ inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, 
 
 #define _LOG_LEVEL(level)       ((::wstux::logging::severity_level)level)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */
 

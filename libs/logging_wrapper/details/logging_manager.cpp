@@ -66,7 +66,6 @@ std::string timestamp()
 } // namespace details
 
 manager::severity_level_t manager::m_global_level = {severity_level::info};
-std::atomic_bool manager::m_immutable_global_level = {false};
 std::recursive_mutex manager::m_loggers_mutex = {};
 manager::logger_holder::map manager::m_loggers_map = {};
 
@@ -101,9 +100,6 @@ manager::logger_holder::ptr manager::register_logger(const std::string& channel,
 
 void manager::set_global_level(severity_level lvl)
 {
-    if (m_immutable_global_level) {
-        return;
-    }
     if ((lvl < severity_level::emerg) || (lvl > severity_level::trace)) {
         return;
     }

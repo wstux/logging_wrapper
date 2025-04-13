@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_
+#ifndef _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_
+#define _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_
 
 #include "logging_wrapper/logging_manager.h"
 #include "logging_wrapper/severity_level.h"
@@ -42,5 +42,5 @@
     }                                                                       \
     while (0)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGC_DEFS_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_LOGGING_DEFS_H_ */
 

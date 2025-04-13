@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGING_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGING_H_
+#ifndef _LIBS_LOGGING_WRAPPER_LOGGING_H_
+#define _LIBS_LOGGING_WRAPPER_LOGGING_H_
 
 #include "logging_wrapper/severity_level.h"
 #include "logging_wrapper/details/logging_defs.h"
@@ -43,5 +43,5 @@
 #define LOG_DEBUG(logger, VARS)             _LOG(logger, LVL_DEBUG,  VARS)
 #define LOG_TRACE(logger, VARS)             _LOG(logger, LVL_TRACE,  VARS)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGING_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_LOGGING_H_ */
 

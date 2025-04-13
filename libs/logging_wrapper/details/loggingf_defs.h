@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
-#define _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
+#ifndef _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
+#define _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_
 
 #include "logging_wrapper/logging_manager.h"
 #include "logging_wrapper/severity_level.h"
@@ -29,8 +29,8 @@
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
         ::wstux::logging::details::timestamp(cur_ts, 24);                   \
-        logger.get_logger().log("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",  \
-                                cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
+        logger.get_logger()("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",      \
+                            cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 #define _LOGF(logger, level, fmt, ...)                                      \
@@ -43,5 +43,5 @@
     }                                                                       \
     while (0)
 
-#endif /* _LOGGING_WRAPPER_LOGGING_WRAPPER_LOGGINGF_DEFS_H_ */
+#endif /* _LIBS_LOGGING_WRAPPER_LOGGINGF_DEFS_H_ */
 
