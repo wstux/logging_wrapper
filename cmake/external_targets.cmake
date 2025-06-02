@@ -25,89 +25,97 @@ include(ExternalProject)
 include(build_utils)
 
 ################################################################################
+# Setting of cmake policies
+################################################################################
+
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+	cmake_policy(SET CMP0135 NEW)
+endif()
+
+################################################################################
+# Constants
+################################################################################
+
+set(EXTERNALS_PREFIX "${CMAKE_BINARY_DIR}/externals")
+
+################################################################################
 # Keywords
 ################################################################################
 
 set(_EXT_TARGET_FLAGS_KW    )
-set(_EXT_TARGET_VALUES_KW   BUILD_CMD
-                            BUILDSYS
-                            CONFIGURE_CMD
+set(_EXT_TARGET_VALUES_KW   BUILD_COMMAND
+                            CONFIGURE_COMMAND
                             INCLUDE_DIR
+                            INSTALL_COMMAND
                             INSTALL_DIR
-                            LIBRARY_DIR
-                            SEARCH_DIR
-                            SOURCE_DIR
-)
-set(_EXT_TARGET_LISTS_KW    BUILD_ARGS
-                            DEPENDS
                             LIBRARIES
+                            URL
+                            #URL_MD5
 )
+set(_EXT_TARGET_LISTS_KW    #DEPENDS
+                            #LIBRARIES
+)
+
+################################################################################
+# Utility functiona
+################################################################################
+
+function(_set_command VAR VALUE DFL_VALUE)
+    set(${VAR} "true" PARENT_SCOPE)
+    if (${VALUE})
+        set(${VAR} bash -c "${${VALUE}}" PARENT_SCOPE)
+    endif()
+endfunction()
 
 ################################################################################
 # Targets
 ################################################################################
 
 function(ExternalTarget EXT_TARGET_NAME)
-    _parse_target_args(${EXT_TARGET_NAME} 
+    _parse_target_args_strings(${EXT_TARGET_NAME}
         _EXT_TARGET_FLAGS_KW _EXT_TARGET_VALUES_KW _EXT_TARGET_LISTS_KW ${ARGN}
     )
 
-    if (DEFINED ${EXT_TARGET_NAME}_FIND_PACKAGE)
-    
-    else()
-        if (DEFINED ${EXT_TARGET_NAME}_BUILDSYS)
-            if (${EXT_TARGET_NAME}_BUILDSYS STREQUAL cmake)
-                if (DEFINED ${EXT_TARGET_NAME}_BUILD_ARGS)
-                    list(APPEND cmake_args ${${EXT_TARGET_NAME}_BUILD_ARGS})
-                endif()
-                
-                if (DEFINED ${EXT_TARGET_NAME}_INSTALL_DIR)
-                    list(APPEND cmake_args -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
-                endif()
-            endif()
-        else()
-            message(FATAL_ERROR " BUILDSYS_NOT_DEFINED branch not supported now")
-        endif()
+    set(_target_name    "${EXT_TARGET_NAME}")
+    set(_target_arch    "${_target_name}.tar.gz")
+    set(_target_dir     "${EXTERNALS_PREFIX}/${_target_name}")
 
-        if (DEFINED ${EXT_TARGET_NAME}_SOURCE_DIR)
-            set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}/${${EXT_TARGET_NAME}_SOURCE_DIR}")
-        else()
-            message(FATAL_ERROR " SOURCE_DIR_NOT_DEFINED branch not supported now")
-        endif()
-        if (DEFINED ${EXT_TARGET_NAME}_INCLUDE_DIR)
-            set(include_dir "${${EXT_TARGET_NAME}_INCLUDE_DIR}")
-        else()
-            message(FATAL_ERROR " INCLUDE_DIR_NOT_DEFINED branch not supported now")
-        endif()
-        if (DEFINED ${EXT_TARGET_NAME}_LIBRARIES)
-            foreach(lib IN LISTS ${EXT_TARGET_NAME}_LIBRARIES)
-                list(APPEND libraries ${lib})
-            endforeach()
-#            set(libraries "${${EXT_TARGET_NAME}_LIBRARIES}")
-        else()
-            message(FATAL_ERROR " LIBRARIES_NOT_DEFINED branch not supported now")
-        endif()
+    set(_ext_url        ${${EXT_TARGET_NAME}_URL})
+    set(_ext_url_hash   ${${EXT_TARGET_NAME}_URL_MD5})
 
-        ExternalProject_Add(
-            ${EXT_TARGET_NAME}
-            PREFIX ${CMAKE_BINARY_DIR}/externals/${EXT_TARGET_NAME}
-            STAMP_DIR ${CMAKE_BINARY_DIR}/externals/${EXT_TARGET_NAME}/${EXT_TARGET_NAME}-stamp
-            TMP_DIR ${CMAKE_BINARY_DIR}/externals/${EXT_TARGET_NAME}/${EXT_TARGET_NAME}-tmp
-            SOURCE_DIR ${source_dir}
-            DEPENDS ${${EXT_TARGET_NAME}_DEPENDS}
-            CMAKE_ARGS ${cmake_args}
-            CMAKE_CACHE_ARGS ${cmake_args}
-            INSTALL_DIR ${${EXT_TARGET_NAME}_INSTALL_DIR}
-            BUILD_COMMAND "${${EXT_TARGET_NAME}_BUILD_CMD}"
-        )
+    _set_command(_configure_cmd ${EXT_TARGET_NAME}_CONFIGURE_COMMAND "true")
+    _set_command(_build_cmd     ${EXT_TARGET_NAME}_BUILD_COMMAND     "true")
 
-        set_target_properties(${EXT_TARGET_NAME}
-                              PROPERTIES
-                                  INCLUDE_DIRECTORIES "${include_dir}"
-        )
-        set_target_properties(${EXT_TARGET_NAME}
-                              PROPERTIES
-                                  LIBRARIES "${libraries}")
+    set(_include_dir "${${EXT_TARGET_NAME}_INCLUDE_DIR}")
+    set(_install_dir "${${EXT_TARGET_NAME}_INSTALL_DIR}")
+    _set_command(_install_command ${EXT_TARGET_NAME}_INSTALL_COMMAND "true")
+
+    set(_depends "")
+
+    ExternalProject_Add(${_target_name}
+        PREFIX              ${_target_dir}
+        STAMP_DIR           ${_target_dir}/stamp
+        TMP_DIR             ${_target_dir}/tmp
+        URL                 ${_ext_url}
+        URL_MD5             ${_ext_url_hash}
+        CONFIGURE_COMMAND   ${_configure_cmd}
+        BUILD_IN_SOURCE     1
+        INSTALL_COMMAND     ${_install_command}
+        INSTALL_DIR         ${_install_dir}
+        BUILD_COMMAND       ${_build_cmd}
+        DEPENDS ${_depends}
+    )
+
+    set(_libraries "")
+    if (${EXT_TARGET_NAME}_LIBRARIES)
+        foreach (_lib IN LISTS ${EXT_TARGET_NAME}_LIBRARIES)
+            set(_libraries "${_libraries}" "${_install_dir}/lib/${_lib}")
+        endforeach()
     endif()
+
+    set_target_properties(${EXT_TARGET_NAME} PROPERTIES INCLUDE_DIRECTORIES "${_include_dir}")
+    set_target_properties(${EXT_TARGET_NAME} PROPERTIES IMPORTED_LOCATION "${_libraries}")
+    set_target_properties(${EXT_TARGET_NAME} PROPERTIES INSTALL_DIR "${install_dir}")
 endfunction()
 

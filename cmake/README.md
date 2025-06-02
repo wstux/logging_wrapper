@@ -11,6 +11,7 @@ The *cmake_cpp_project_template* assumes you want to setup a project using
 
 ## Contents
 
+* [Description](#description)
 * [Usage](#usage)
 * [Targets](#targets)
   * [Libraries](#libraries)
@@ -22,21 +23,17 @@ The *cmake_cpp_project_template* assumes you want to setup a project using
 * [Build](#build)
 * [License](#license)
 
+## Description
+
+The template sets up hooks for Git. In particular, a check for the presence of
+last whitespace characters in lines is added. This can lead to errors due to
+empty lines at the end of the file. To fix this error, you need to run the
+command:
+```
+git config --global core.whitespace -blank-at-eof
+```
+
 ## Usage
-
-### Install template
-
-Template usage:
-* add a template to the project as a submodule/copy to a subdirectory of the
-  project root directory;
-* copy the files `CMakeLists.txt.in` and `Makefile.in` to the root directory
-  of the project;
-* rename `CMakeLists.txt.in` -> `CMakeLists.txt` and replace `@project_name@`
-  with the name of the project being developed, `@common_cmake_dir@` replace
-  with the path to the directory with template files relative to the root
-  directory of the project;
-* rename `Makefile.in` -> `Makefile` and replace `@common_cmake_dir@` with the
-  path to the template directory relative to the project root directory.
 
 ### Build project
 
