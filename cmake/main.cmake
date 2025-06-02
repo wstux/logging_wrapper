@@ -66,28 +66,29 @@ include(CMakeDependentOption)
 
 include(build_flags)
 
+set(PROJECT_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 if(CMAKE_C_COMPILER)
     message(STATUS "[INFO ] C compiler flags: '${CMAKE_C_FLAGS}'")
-    if(CMAKE_BUILD_TYPE STREQUAL "debug")
+    if(PROJECT_BUILD_TYPE STREQUAL "debug")
         message(STATUS "[INFO ] C debug compiler flags: '${CMAKE_C_FLAGS_DEBUG}'")
-    elseif(CMAKE_BUILD_TYPE STREQUAL "release")
+    elseif(PROJECT_BUILD_TYPE STREQUAL "release")
         message(STATUS "[INFO ] C release compiler flags: '${CMAKE_C_FLAGS_RELEASE}'")
-#    elseif(CMAKE_BUILD_TYPE STREQUAL "relwithdebinfo")
+#    elseif(PROJECT_BUILD_TYPE STREQUAL "relwithdebinfo")
 #        message(STATUS "[INFO ] C rel_with_deb_info compiler flags: '${CMAKE_C_FLAGS_RELWITHDEBINFO}'")
-#    elseif(CMAKE_BUILD_TYPE STREQUAL "minsizerel")
+#    elseif(PROJECT_BUILD_TYPE STREQUAL "minsizerel")
 #        message(STATUS "[INFO ] C min_size_rel compiler flags: '${CMAKE_C_FLAGS_MINSIZEREL}'")
     endif()
     message(STATUS "[INFO ] C link executable: ${CMAKE_C_LINK_EXECUTABLE}")
 endif()
 if(CMAKE_CXX_COMPILER)
     message(STATUS "[INFO ] C++ compiler flags: '${CMAKE_CXX_FLAGS}'")
-    if(CMAKE_BUILD_TYPE STREQUAL "debug")
+    if(PROJECT_BUILD_TYPE STREQUAL "debug")
         message(STATUS "[INFO ] C++ debug compiler flags: '${CMAKE_CXX_FLAGS_DEBUG}'")
-    elseif(CMAKE_BUILD_TYPE STREQUAL "release")
+    elseif(PROJECT_BUILD_TYPE STREQUAL "release")
         message(STATUS "[INFO ] C++ release compiler flags: '${CMAKE_CXX_FLAGS_RELEASE}'")
-#    elseif(CMAKE_BUILD_TYPE STREQUAL "relwithdebinfo")
+#    elseif(PROJECT_BUILD_TYPE STREQUAL "relwithdebinfo")
 #        message(STATUS "[INFO ] C++ rel_with_deb_info compiler flags: '${CMAKE_CXX_FLAGS_RELWITHDEBINFO}'")
-#    elseif(CMAKE_BUILD_TYPE STREQUAL "minsizerel")
+#    elseif(PROJECT_BUILD_TYPE STREQUAL "minsizerel")
 #        message(STATUS "[INFO ] C++ min_size_rel compiler flags: '${CMAKE_CXX_FLAGS_MINSIZEREL}'")
     endif()
     message(STATUS "[INFO ] C++ link executable: ${CMAKE_CXX_LINK_EXECUTABLE}")
@@ -98,11 +99,20 @@ message(STATUS "[INFO ] Module linker flags: ${CMAKE_MODULE_LINKER_FLAGS}")
 message(STATUS "[INFO ] Shared linker flags: ${CMAKE_SHARED_LINKER_FLAGS}")
 
 ################################################################################
+# Configure git repository
+################################################################################
+
+include(hooks)
+
+InstallHook(pre-commit)
+InstallHook(commit-msg)
+
+################################################################################
 # Include targets functions
 ################################################################################
 
 include(build_targets)
-include(custom_test_targets)
+include(custom_targets)
 include(driver_targets)
 include(external_targets)
 include(wrapper_targets)

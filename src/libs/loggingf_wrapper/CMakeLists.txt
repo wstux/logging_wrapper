@@ -5,7 +5,6 @@ LibTarget(loggingf_wrapper STATIC
         severity_level.h
     SOURCES
         details/manager.c
-    INCLUDE_DIR libs
 )
 
 set_target_properties(loggingf_wrapper PROPERTIES LINKER_LANGUAGE C)

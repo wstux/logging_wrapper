@@ -67,7 +67,7 @@ static size_t hash_fn(const char* p_key, size_t length)
     size_t h = 5381;
     while (length--) {
         /* h = 33 * h ^ s[i]; */
-        h += (h << 5);  
+        h += (h << 5);
         h ^= *p_key++;
     }
     return h;

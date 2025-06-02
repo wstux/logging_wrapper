@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <ostream>
 
-/* 
+/*
  * Implementations of log levels.
  * Supported levels:
  * - EMERG  - the system is unusable;
