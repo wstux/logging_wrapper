@@ -5,6 +5,5 @@ LibTarget(logging_wrapper STATIC
         severity_level.h
     SOURCES
         details/manager.cpp
-    INCLUDE_DIR libs
 )
 

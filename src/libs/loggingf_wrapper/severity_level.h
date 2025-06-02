@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/* 
+/*
  * Implementations of log levels.
  * Supported levels:
  * - EMERG  - the system is unusable;
