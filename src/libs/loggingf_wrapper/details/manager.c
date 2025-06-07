@@ -29,30 +29,30 @@
 #define _TS_FILL_DFL(ts_buf, buf_size)                               \
     memcpy(ts_buf, "yyyy-MM-dd hh:mm:ss.mil", (buf_size < 24) ? buf_size : 24)
 
-struct _hash_node;
-typedef struct _hash_node       hash_node_t;
-typedef struct loggerf          _loggerf_t;
-typedef _loggerf_t*	(*get_logger_fn_t)(const char*);
+struct _lw_hash_node;
+typedef struct _lw_hash_node    hash_node_t;
+typedef struct lw_loggerf       _lw_loggerf_t;
+typedef _lw_loggerf_t*	(*get_logger_fn_t)(const char*);
 
-struct _hash_node
+struct _lw_hash_node
 {
     hash_node_t* p_next;
-    _loggerf_t logger;
+    _lw_loggerf_t logger;
 };
 
-struct _loggingf_manager
+struct _lw_loggingf_manager
 {
     volatile sig_atomic_t global_lvl;
     hash_node_t** p_bucket;
     size_t size;
     size_t capacity;
     hash_node_t* p_pool;
-    _loggerf_t* p_root_logger;
+    _lw_loggerf_t* p_root_logger;
     loggerf_fn_t logger_fn;
     get_logger_fn_t get_logger_fn;
 };
 
-typedef struct _loggingf_manager    loggingf_manager_t;
+typedef struct _lw_loggingf_manager loggingf_manager_t;
 
 static loggingf_manager_t* g_p_manager = NULL;
 
@@ -73,7 +73,7 @@ static size_t hash_fn(const char* p_key, size_t length)
     return h;
 }
 
-static _loggerf_t* get_logger_dynamic_size(const char* channel)
+static _lw_loggerf_t* get_logger_dynamic_size(const char* channel)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
 
@@ -86,7 +86,7 @@ static _loggerf_t* get_logger_dynamic_size(const char* channel)
 
     hash_node_t** p_node;
     for (p_node = &g_p_manager->p_bucket[i]; *p_node != NULL; p_node = &(*p_node)->p_next) {
-        if ((*p_node)->logger.length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
+        if ((*p_node)->logger._length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
             return &(*p_node)->logger;
         }
     }
@@ -105,7 +105,7 @@ static _loggerf_t* get_logger_dynamic_size(const char* channel)
                 continue;
             }
             for (hash_node_t* p_old_node = g_p_manager->p_bucket[i]; p_old_node != NULL;) {
-                hash = hash_fn(p_old_node->logger.channel, p_old_node->logger.length);
+                hash = hash_fn(p_old_node->logger.channel, p_old_node->logger._length);
                 p_node = &p_bucket[hash % capacity];
                 while (*p_node != NULL) {
                     p_node = &(*p_node)->p_next;
@@ -125,15 +125,15 @@ static _loggerf_t* get_logger_dynamic_size(const char* channel)
     (*p_node)->p_next = NULL;
     ++g_p_manager->size;
 
+    (*p_node)->logger.p_logger = g_p_manager->logger_fn;
     (*p_node)->logger.level = _CHANNEL_LOG_LEVEL_DFL;
     memcpy((*p_node)->logger.channel, channel, length);
     (*p_node)->logger.channel[length] = '\0';
-    (*p_node)->logger.length = length;
-    (*p_node)->logger.p_logger = g_p_manager->logger_fn;
+    (*p_node)->logger._length = length;
     return &(*p_node)->logger;
 }
 
-static _loggerf_t* get_logger_fixed_size(const char* channel)
+static _lw_loggerf_t* get_logger_fixed_size(const char* channel)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
 
@@ -146,7 +146,7 @@ static _loggerf_t* get_logger_fixed_size(const char* channel)
 
     hash_node_t** p_node;
     for (p_node = &g_p_manager->p_bucket[i]; *p_node != NULL; p_node = &(*p_node)->p_next) {
-        if ((*p_node)->logger.length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
+        if ((*p_node)->logger._length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
             return &(*p_node)->logger;
         }
     }
@@ -165,11 +165,11 @@ static _loggerf_t* get_logger_fixed_size(const char* channel)
     (*p_node)->logger.level = _CHANNEL_LOG_LEVEL_DFL;
     memcpy((*p_node)->logger.channel, channel, length);
     (*p_node)->logger.channel[length] = '\0';
-    (*p_node)->logger.length = length;
+    (*p_node)->logger._length = length;
     return &(*p_node)->logger;
 }
 
-bool can_log(int lvl)
+bool lw_can_log(int lvl)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     if (lvl < 0 || lvl > LVL_TRACE) {
@@ -178,7 +178,7 @@ bool can_log(int lvl)
     return g_p_manager->global_lvl >= lvl;
 }
 
-bool can_channel_log(loggerf_t p_logger, int lvl)
+bool lw_can_channel_log(loggerf_t p_logger, int lvl)
 {
     if (p_logger == NULL) {
         return false;
@@ -189,20 +189,20 @@ bool can_channel_log(loggerf_t p_logger, int lvl)
     return p_logger->level >= lvl;
 }
 
-loggerf_t get_logger(const char* channel)
+loggerf_t lw_get_logger(const char* channel)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->get_logger_fn(channel);
 }
 
-severity_level_t global_level(void)
+severity_level_t lw_global_level(void)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->global_lvl;
 }
 
-bool init_logging(loggerf_fn_t p_logger_fn, logging_policy_t policy, size_t channel_count,
-                  severity_level_t dfl_lvl, const char* p_root_ch)
+bool lw_init_logging(loggerf_fn_t p_logger_fn, logging_policy_t policy, size_t channel_count,
+                     severity_level_t dfl_lvl, const char* p_root_ch)
 {
     assert(g_p_manager == NULL && "Logging manager is initialized");
     assert(p_logger_fn != NULL);
@@ -232,20 +232,17 @@ bool init_logging(loggerf_fn_t p_logger_fn, logging_policy_t policy, size_t chan
 
     g_p_manager->p_bucket = (hash_node_t**)malloc(channel_count * sizeof(hash_node_t*));
     if (g_p_manager->p_bucket == NULL) {
-        deinit_logging();
+        lw_deinit_logging();
         return false;
     }
     for (size_t i = 0; i < channel_count; ++i) {
         g_p_manager->p_bucket[i] = NULL;
     }
 
-    //hash_node_t** p_insert_node = &g_p_manager->p_pool;
-    //for (size_t i = 0; i < channel_count; ++i) {
-    //    hash_node_t* p_node = (hash_node_t*)malloc(sizeof(hash_node_t));
     if (policy == fixed_size) {
         g_p_manager->p_pool = (hash_node_t*)malloc(channel_count * sizeof(hash_node_t));
         if (g_p_manager->p_pool == NULL) {
-            deinit_logging();
+            lw_deinit_logging();
             return false;
         }
         for (size_t i = 0; i < channel_count; ++i) {
@@ -261,7 +258,7 @@ bool init_logging(loggerf_fn_t p_logger_fn, logging_policy_t policy, size_t chan
     return true;
 }
 
-bool deinit_logging(void)
+bool lw_deinit_logging(void)
 {
     if (g_p_manager == NULL) {
         return true;
@@ -278,7 +275,6 @@ bool deinit_logging(void)
         }
     }
 
-    //free_nodes(g_p_manager->p_pool);
     free(g_p_manager->p_pool);
     free(g_p_manager->p_bucket);
     free(g_p_manager);
@@ -286,29 +282,29 @@ bool deinit_logging(void)
     return true;
 }
 
-loggerf_t root_logger(void)
+loggerf_t lw_root_logger(void)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->p_root_logger;
 }
 
-void set_global_level(severity_level_t lvl)
+void lw_set_global_level(severity_level_t lvl)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     g_p_manager->global_lvl = lvl;
 }
 
-void set_logger_level(const char* channel, severity_level_t lvl)
+void lw_set_logger_level(const char* channel, severity_level_t lvl)
 {
     assert(g_p_manager != NULL && "Loggi, logging_policy_t policyng manager is not initialized");
 
-    _loggerf_t* p_logger = g_p_manager->get_logger_fn(channel);
+    _lw_loggerf_t* p_logger = g_p_manager->get_logger_fn(channel);
     if (p_logger != NULL) {
         p_logger->level = lvl;
     }
 }
 
-int timestamp(char* buf, size_t size)
+int lw_timestamp(char* buf, size_t size)
 {
     struct timeval cur_tv;
     struct tm cur_tm;

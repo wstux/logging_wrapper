@@ -64,41 +64,51 @@ bool is_equal_logs(const std::string& ethalon, const std::string& log)
     return true;
 }
 
+class logging_fixture : public ::testing::Test
+{
+public:
+    virtual void SetUp() override {  }
+    virtual void TearDown() override
+    {
+        g_test_loggerf.clear();
+        lw_deinit_logging();
+    }
+};
+
+using loggingf = logging_fixture;
+
 } // <anonymous> namespace
 
-TEST(loggingf, logging)
+TEST_F(loggingf, logging)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level::debug, NULL));
-    loggerf_t root_logger = get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::debug, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
-TEST(loggingf, logging_dynamic)
+TEST_F(loggingf, logging_dynamic)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::dynamic_size, 1, severity_level::debug, NULL));
-    loggerf_t root_logger = get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 1, severity_level_t::debug, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
+    lw_deinit_logging();
 }
 
-TEST(loggingf, severity_level)
+TEST_F(loggingf, severity_level)
 {
     g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level::crit, NULL));
-    loggerf_t root_logger = get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::crit, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -107,32 +117,30 @@ TEST(loggingf, severity_level)
     std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 
-    set_global_level(severity_level::info);
+    lw_set_global_level(severity_level_t::info);
     LOGF_ERROR(root_logger, "error log %d", 42);
     ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n"
               "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
-TEST(loggingf, channels)
+TEST_F(loggingf, channels)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::fixed_size, 2, severity_level::crit, NULL));
-    loggerf_t root_logger = get_logger("Root");
-    loggerf_t chan_logger = get_logger("Channel");
-    set_global_level(severity_level::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 2, severity_level_t::crit, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
+    loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(severity_level_t::debug);
 
-    set_logger_level("Root", severity_level::info);
-    set_logger_level("Channel", severity_level::error);
+    lw_set_logger_level("Root", severity_level_t::info);
+    lw_set_logger_level("Channel", severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    set_logger_level("Root", severity_level::crit);
-    set_logger_level("Channel", severity_level::crit);
+    lw_set_logger_level("Root", severity_level_t::crit);
+    lw_set_logger_level("Channel", severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -145,26 +153,24 @@ TEST(loggingf, channels)
                                 "****-**-** **:**:**.*** [CRIT ] Channel: crit log 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
-TEST(loggingf, channels_dynamic)
+TEST_F(loggingf, channels_dynamic)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level::crit, NULL));
-    loggerf_t root_logger = get_logger("Root");
-    loggerf_t chan_logger = get_logger("Channel");
-    set_global_level(severity_level::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level_t::crit, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
+    loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(severity_level_t::debug);
 
-    set_logger_level("Root", severity_level::info);
-    set_logger_level("Channel", severity_level::error);
+    lw_set_logger_level("Root", severity_level_t::info);
+    lw_set_logger_level("Channel", severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    set_logger_level("Root", severity_level::crit);
-    set_logger_level("Channel", severity_level::crit);
+    lw_set_logger_level("Root", severity_level_t::crit);
+    lw_set_logger_level("Channel", severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -177,26 +183,24 @@ TEST(loggingf, channels_dynamic)
                                 "****-**-** **:**:**.*** [CRIT ] Channel: crit log 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
-TEST(loggingf, channels_limit)
+TEST_F(loggingf, channels_limit)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level::crit, NULL));
-    loggerf_t root_logger = get_logger("Root");
-    loggerf_t chan_logger = get_logger("Channel");
-    set_global_level(severity_level::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::crit, NULL));
+    loggerf_t root_logger = lw_get_logger("Root");
+    loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(severity_level_t::debug);
 
-    set_logger_level("Root", severity_level::info);
-    set_logger_level("Channel", severity_level::error);
+    lw_set_logger_level("Root", severity_level_t::info);
+    lw_set_logger_level("Channel", severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    set_logger_level("Root", severity_level::crit);
-    set_logger_level("Channel", severity_level::crit);
+    lw_set_logger_level("Root", severity_level_t::crit);
+    lw_set_logger_level("Channel", severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -207,30 +211,28 @@ TEST(loggingf, channels_limit)
                                 "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
-TEST(loggingf, channels_dynamic_hash)
+TEST_F(loggingf, channels_dynamic_hash)
 {
-    g_test_loggerf.clear();
-    EXPECT_TRUE(init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level::crit, NULL));
+    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level_t::crit, NULL));
     for (size_t i = 0; i < 64; ++ i) {
         std::string ch_name = "Channel_" + std::to_string(i);
-        get_logger(ch_name.c_str());
+        lw_get_logger(ch_name.c_str());
     }
-    loggerf_t root_logger = get_logger("Root");
-    loggerf_t chan_logger = get_logger("Channel");
-    set_global_level(severity_level::debug);
+    loggerf_t root_logger = lw_get_logger("Root");
+    loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(severity_level_t::debug);
 
-    set_logger_level("Root", severity_level::info);
-    set_logger_level("Channel", severity_level::error);
+    lw_set_logger_level("Root", severity_level_t::info);
+    lw_set_logger_level("Channel", severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    set_logger_level("Root", severity_level::crit);
-    set_logger_level("Channel", severity_level::crit);
+    lw_set_logger_level("Root", severity_level_t::crit);
+    lw_set_logger_level("Channel", severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -243,7 +245,6 @@ TEST(loggingf, channels_dynamic_hash)
                                 "****-**-** **:**:**.*** [CRIT ] Channel: crit log 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
-    deinit_logging();
 }
 
 int main(int /*argc*/, char** /*argv*/)

@@ -62,7 +62,7 @@ extern "C" {
 
 #define LOGF_LEVEL(level)       _IMPL_LOGF_LVL_ ## level
 
-enum severity_level
+enum lw_severity_level
 {
     emerg   = LVL_EMERG,
     fatal   = LVL_FATAL,
@@ -75,7 +75,7 @@ enum severity_level
     trace   = LVL_TRACE
 };
 
-#define _SEVERITY_LEVEL(level)  ((enum severity_level)level)
+#define _SEVERITY_LEVEL(level)  ((enum lw_severity_level)level)
 
 #if defined(__cplusplus)
 }
