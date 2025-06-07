@@ -246,5 +246,53 @@ logger<TLogger> manager::get_logger(const std::string& channel)
 } // namespace logging
 } // namespace wstux
 
+/*
+ * Logging for loggers in C-style
+ */
+#if defined(LOGGINGF_WRAPPER_IMPL)
+    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
+        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, __VA_ARGS__)
+#else
+    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
+        char cur_ts[24];                                                    \
+        ::wstux::logging::details::timestamp(cur_ts, 24);                   \
+        logger.get_logger()("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",      \
+                            cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
+#endif
+
+#define _LOGF(logger, level, fmt, ...)                                      \
+    do {                                                                    \
+        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
+            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
+            break;                                                          \
+        }                                                                   \
+        _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \
+    }                                                                       \
+    while (0)
+
+
+/*
+ * Logging for loggers in CPP-style
+ */
+#if defined(LOGGING_WRAPPER_IMPL)
+    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
+        LOGGING_WRAPPER_IMPL(logger.get_logger(), level)
+#else
+    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
+        logger.get_logger() << ::wstux::logging::details::timestamp() << " "\
+                            << _LOG_LEVEL(level) << " " << logger.channel() \
+                            << ": "
+#endif
+
+#define _LOG(logger, level, VARS)                                           \
+    do {                                                                    \
+        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
+            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
+            break;                                                          \
+        }                                                                   \
+        _LOGGING_WRAPPER_IMPL(logger, level) << VARS << std::endl;          \
+    }                                                                       \
+    while (0)
+
 #endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
 
