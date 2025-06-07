@@ -256,7 +256,7 @@ logger<TLogger> manager::get_logger(const std::string& channel)
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
         ::wstux::logging::details::timestamp(cur_ts, 24);                   \
-        logger.get_logger()("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",      \
+        logger.get_logger()("%s " LOGF_LEVEL(level) " %s: " fmt "\n",       \
                             cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
 #endif
 
@@ -280,7 +280,7 @@ logger<TLogger> manager::get_logger(const std::string& channel)
 #else
     #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
         logger.get_logger() << ::wstux::logging::details::timestamp() << " "\
-                            << _LOG_LEVEL(level) << " " << logger.channel() \
+                            << LOG_LEVEL(level) << " " << logger.channel()  \
                             << ": "
 #endif
 

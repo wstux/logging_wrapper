@@ -60,8 +60,8 @@
 #define _IMPL_LOG_LVL_7         "[DEBUG]"
 #define _IMPL_LOG_LVL_8         "[TRACE]"
 
-#define _LOGF_LEVEL(level)      _IMPL_LOG_LVL_ ## level
-#define _LOG_LEVEL(level)       _IMPL_LOG_LVL_ ## level
+#define LOGF_LEVEL(level)       _IMPL_LOG_LVL_ ## level
+#define LOG_LEVEL(level)        _IMPL_LOG_LVL_ ## level
 
 namespace wstux {
 namespace logging {

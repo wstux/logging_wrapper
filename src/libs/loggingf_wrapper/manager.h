@@ -85,8 +85,8 @@ int timestamp(char* buf, size_t size);
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
         timestamp(cur_ts, 24);                                              \
-        logger->p_logger("%s " _LOGF_LEVEL(level) " %s: " fmt "\n",         \
-                                cur_ts, logger->channel __VA_OPT__(,) __VA_ARGS__)
+        logger->p_logger("%s " LOGF_LEVEL(level) " %s: " fmt "\n",          \
+                         cur_ts, logger->channel __VA_OPT__(,) __VA_ARGS__)
 #endif
 
 #define _LOGF(logger, level, fmt, ...)                                      \

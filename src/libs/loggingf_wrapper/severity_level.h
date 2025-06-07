@@ -60,7 +60,7 @@ extern "C" {
 #define _IMPL_LOGF_LVL_7        "[DEBUG]"
 #define _IMPL_LOGF_LVL_8        "[TRACE]"
 
-#define _LOGF_LEVEL(level)      _IMPL_LOGF_LVL_ ## level
+#define LOGF_LEVEL(level)       _IMPL_LOGF_LVL_ ## level
 
 enum severity_level
 {
@@ -74,6 +74,8 @@ enum severity_level
     debug   = LVL_DEBUG,
     trace   = LVL_TRACE
 };
+
+#define _SEVERITY_LEVEL(level)  ((enum severity_level)level)
 
 #if defined(__cplusplus)
 }
