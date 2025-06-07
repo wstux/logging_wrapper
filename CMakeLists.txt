@@ -25,5 +25,5 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 add_subdirectory(externals)
 add_subdirectory(src/libs/logging_wrapper)
 add_subdirectory(src/libs/loggingf_wrapper)
-add_subdirectory(tests)
+add_subdirectory(src/tests)
 

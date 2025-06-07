@@ -67,7 +67,7 @@ macro(LibTarget TARGET_NAME)
             set(_public_headers "${_public_headers}" "${CMAKE_CURRENT_SOURCE_DIR}/${_hdr}")
         endforeach()
     else()
-        file(GLOB _public_headers
+        file(GLOB_RECURSE _public_headers
             "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
         )

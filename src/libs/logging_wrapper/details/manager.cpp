@@ -89,6 +89,10 @@ void manager::clear()
     m_loggers_map.erase(m_loggers_map.begin(), m_loggers_map.end());
 }
 
+void manager::init()
+{
+}
+
 manager::logger_holder::ptr manager::register_logger(const std::string& channel, severity_level lvl)
 {
     using return_type = std::pair<logger_holder::map::iterator, bool>;

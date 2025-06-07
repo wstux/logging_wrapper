@@ -19,9 +19,8 @@
 #ifndef _LIBS_LOGGING_WRAPPER_LOGGING_H_
 #define _LIBS_LOGGING_WRAPPER_LOGGING_H_
 
+#include "logging_wrapper/manager.h"
 #include "logging_wrapper/severity_level.h"
-#include "logging_wrapper/details/logging_defs.h"
-#include "logging_wrapper/details/loggingf_defs.h"
 
 #define LOGF_EMERG(logger, fmt, ...)        _LOGF(logger, LVL_EMERG,  fmt, __VA_ARGS__)
 #define LOGF_FATAL(logger, fmt, ...)        _LOGF(logger, LVL_FATAL,  fmt, __VA_ARGS__)

@@ -60,20 +60,22 @@ extern "C" {
 #define _IMPL_LOGF_LVL_7        "[DEBUG]"
 #define _IMPL_LOGF_LVL_8        "[TRACE]"
 
-#define _LOGF_LEVEL(level)      _IMPL_LOGF_LVL_ ## level
+#define LOGF_LEVEL(level)       _IMPL_LOGF_LVL_ ## level
 
-enum severity_level
+enum lw_severity_level
 {
-    emerg   = 0,
-    fatal   = 1,
-    crit    = 2,
-    error   = 3,
-    warning = 4,
-    notice  = 5,
-    info    = 6,
-    debug   = 7,
-    trace   = 8
+    emerg   = LVL_EMERG,
+    fatal   = LVL_FATAL,
+    crit    = LVL_CRIT,
+    error   = LVL_ERROR,
+    warning = LVL_WARN,
+    notice  = LVL_NOTICE,
+    info    = LVL_INFO,
+    debug   = LVL_DEBUG,
+    trace   = LVL_TRACE
 };
+
+#define _SEVERITY_LEVEL(level)  ((enum lw_severity_level)level)
 
 #if defined(__cplusplus)
 }
