@@ -35,8 +35,8 @@
 
 #define _LOGF(logger, level, fmt, ...)                                      \
     do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
-            ! logger.can_log(_LOG_LEVEL(level))) {                          \
+        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
+            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
             break;                                                          \
         }                                                                   \
         _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \

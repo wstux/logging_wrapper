@@ -64,15 +64,15 @@ extern "C" {
 
 enum severity_level
 {
-    emerg   = 0,
-    fatal   = 1,
-    crit    = 2,
-    error   = 3,
-    warning = 4,
-    notice  = 5,
-    info    = 6,
-    debug   = 7,
-    trace   = 8
+    emerg   = LVL_EMERG,
+    fatal   = LVL_FATAL,
+    crit    = LVL_CRIT,
+    error   = LVL_ERROR,
+    warning = LVL_WARN,
+    notice  = LVL_NOTICE,
+    info    = LVL_INFO,
+    debug   = LVL_DEBUG,
+    trace   = LVL_TRACE
 };
 
 #if defined(__cplusplus)

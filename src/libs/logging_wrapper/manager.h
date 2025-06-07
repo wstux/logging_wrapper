@@ -19,6 +19,7 @@
 #ifndef _LIBS_LOGGING_WRAPPER_MANAGER_H_
 #define _LIBS_LOGGING_WRAPPER_MANAGER_H_
 
+#include <cassert>
 #include <atomic>
 #include <functional>
 #include <memory>

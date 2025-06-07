@@ -34,8 +34,8 @@
 
 #define _LOG(logger, level, VARS)                                           \
     do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_LOG_LEVEL(level)) ||      \
-            ! logger.can_log(_LOG_LEVEL(level))) {                          \
+        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
+            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
             break;                                                          \
         }                                                                   \
         _LOGGING_WRAPPER_IMPL(logger, level) << VARS << std::endl;          \

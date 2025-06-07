@@ -19,8 +19,6 @@
 #ifndef _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
 #define _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_
 
-#include <cassert>
-
 #include <array>
 #include <iomanip>
 #include <ostream>
@@ -52,60 +50,39 @@
 
 /**
  */
-#define _IMPL_LOGF_LVL_0        "[EMERG]"
-#define _IMPL_LOGF_LVL_1        "[FATAL]"
-#define _IMPL_LOGF_LVL_2        "[CRIT ]"
-#define _IMPL_LOGF_LVL_3        "[ERROR]"
-#define _IMPL_LOGF_LVL_4        "[WARN ]"
-#define _IMPL_LOGF_LVL_5        "[NOTIC]"
-#define _IMPL_LOGF_LVL_6        "[INFO ]"
-#define _IMPL_LOGF_LVL_7        "[DEBUG]"
-#define _IMPL_LOGF_LVL_8        "[TRACE]"
+#define _IMPL_LOG_LVL_0         "[EMERG]"
+#define _IMPL_LOG_LVL_1         "[FATAL]"
+#define _IMPL_LOG_LVL_2         "[CRIT ]"
+#define _IMPL_LOG_LVL_3         "[ERROR]"
+#define _IMPL_LOG_LVL_4         "[WARN ]"
+#define _IMPL_LOG_LVL_5         "[NOTIC]"
+#define _IMPL_LOG_LVL_6         "[INFO ]"
+#define _IMPL_LOG_LVL_7         "[DEBUG]"
+#define _IMPL_LOG_LVL_8         "[TRACE]"
 
-#define _LOGF_LEVEL(level)      _IMPL_LOGF_LVL_ ## level
+#define _LOGF_LEVEL(level)      _IMPL_LOG_LVL_ ## level
+#define _LOG_LEVEL(level)       _IMPL_LOG_LVL_ ## level
 
-/**
- */
 namespace wstux {
 namespace logging {
 
-enum severity_level : uint8_t
+enum severity_level
 {
-    emerg   = 0,
-    fatal   = 1,
-    crit    = 2,
-    error   = 3,
-    warning = 4,
-    notice  = 5,
-    info    = 6,
-    debug   = 7,
-    trace   = 8
+    emerg   = LVL_EMERG,
+    fatal   = LVL_FATAL,
+    crit    = LVL_CRIT,
+    error   = LVL_ERROR,
+    warning = LVL_WARN,
+    notice  = LVL_NOTICE,
+    info    = LVL_INFO,
+    debug   = LVL_DEBUG,
+    trace   = LVL_TRACE
 };
-
-template<typename TChar, typename TTraits>
-inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& stream, const severity_level lvl)
-{
-    static const std::array<const char*, 9> severities = {
-        "[EMERG]",
-        "[FATAL]",
-        "[CRIT ]",
-        "[ERROR]",
-        "[WARN ]",
-        "[NOTIC]",
-        "[INFO ]",
-        "[DEBUG]",
-        "[TRACE]"
-    };
-
-    assert(severities.size() > static_cast<std::size_t>(lvl) && "severity level to stream conversion failed - out of bounds");
-    stream << std::setw(7) << std::left << severities[static_cast<std::size_t>(lvl)];
-    return stream;
-}
 
 } // namespace logging
 } // namespace wstux
 
-#define _LOG_LEVEL(level)       ((::wstux::logging::severity_level)level)
+#define _SEVERITY_LEVEL(level)  ((::wstux::logging::severity_level)level)
 
 #endif /* _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */
 
