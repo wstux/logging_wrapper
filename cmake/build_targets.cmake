@@ -28,7 +28,7 @@ include(build_utils)
 
 macro(LibTarget TARGET_NAME)
     set(_flags_kw   MODULE SHARED STATIC INTERFACE)
-    set(_values_kw  COMMENT INCLUDE_DIR LANGUAGE)
+    set(_values_kw  COMMENT INCLUDE_DIR LINKER_LANGUAGE)
     set(_lists_kw   HEADERS SOURCES LIBRARIES DEPENDS COMPILE_DEFINITIONS)
     _parse_target_args(${TARGET_NAME}
         _flags_kw _values_kw _lists_kw ${ARGN}
@@ -81,8 +81,8 @@ macro(LibTarget TARGET_NAME)
 
     set_property(DIRECTORY PROPERTY ${TARGET_NAME}_INCLUDE_DIR  ${_include_dir})
 
-    if ("${${TARGET_NAME}_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LANGUAGE})
+    if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
+        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
     endif()
 
     _configure_target(${TARGET_NAME})
@@ -123,8 +123,8 @@ macro(ExecTarget TARGET_NAME)
         ${${TARGET_NAME}_HEADERS} ${${TARGET_NAME}_SOURCES}
     )
 
-    if ("${${TARGET_NAME}_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LANGUAGE})
+    if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
+        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
     endif()
 
     _configure_target(${TARGET_NAME})
@@ -152,8 +152,8 @@ macro(TestTarget TARGET_NAME)
     add_executable(${TARGET_NAME}
         ${${TARGET_NAME}_HEADERS} ${${TARGET_NAME}_SOURCES}
     )
-    if ("${${TARGET_NAME}_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LANGUAGE})
+    if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
+        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
     endif()
     _configure_target(${TARGET_NAME})
 
