@@ -31,6 +31,15 @@
 
 namespace wstux {
 namespace logging {
+
+template<typename TLogger>
+TLogger make_logger(const std::string& ch);
+
+} // namespace logging
+} // namespace wstux
+
+namespace wstux {
+namespace logging {
 namespace details {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,23 +76,17 @@ struct logger_impl final : public base_logger
 {
     using base = base_logger;
     using logger_type = TLogger;
-    using make_logger_fn_t = std::function<TLogger(const std::string&)>;
     using ptr = std::shared_ptr<logger_impl>;
 
     logger_impl(const std::string& channel, severity_level lvl)
         : base(channel, lvl)
-        , logger(make_logger_fn(channel))
+        , logger(make_logger<logger_type>(channel))
     {}
 
     virtual ~logger_impl() {}
 
     logger_type logger;
-
-    static make_logger_fn_t make_logger_fn;
 };
-
-template<typename TLogger>
-typename logger_impl<TLogger>::make_logger_fn_t logger_impl<TLogger>::make_logger_fn = [] (const std::string& c) -> TLogger { return TLogger(c); };
 
 ////////////////////////////////////////////////////////////////////////////////
 // free functions
@@ -154,8 +157,7 @@ public:
 
     static severity_level global_level() { return m_global_level; }
 
-    template<typename TLogger>
-    static void init(const std::function<TLogger(const std::string&)>& make_logger_fn);
+    static void init();
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
@@ -238,12 +240,6 @@ logger<TLogger> manager::get_logger(const std::string& channel)
         p_holder = it->second;
     }
     return logger<TLogger>(p_holder->get_logger<logger_impl_t>());
-}
-
-template<typename TLogger>
-void manager::init(const std::function<TLogger(const std::string&)>& make_logger_fn)
-{
-    details::logger_impl<TLogger>::make_logger_fn = make_logger_fn;
 }
 
 } // namespace logging

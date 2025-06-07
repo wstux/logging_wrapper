@@ -42,6 +42,20 @@ struct test_logger final
     std::stringstream str_logger;
 };
 
+struct test_specific_logger final
+{
+    test_specific_logger(const std::string&, const std::string&) {}
+
+    template <typename T>
+    inline std::stringstream& operator<<(const T& val)
+    {
+        str_logger << val;
+        return str_logger;
+    }
+
+    std::stringstream str_logger;
+};
+
 struct test_loggerf final
 {
     test_loggerf(const std::string&) {}
@@ -76,13 +90,33 @@ bool is_equal_logs(const std::string& ethalon, const std::string& log)
     return true;
 }
 
+class logging_fixture : public ::testing::Test
+{
+public:
+    virtual void SetUp() override { ::wstux::logging::manager::init(); }
+    virtual void TearDown() override { ::wstux::logging::manager::clear(); }
+};
+
+using logging_cpp = logging_fixture;
+using loggingf = logging_fixture;
+using logging = logging_fixture;
+
 } // <anonymous> namespace
 
-TEST(logging_cpp, logging)
+namespace wstux {
+namespace logging {
+
+template<> test_logger make_logger<test_logger>(const std::string& ch) { return test_logger(ch); }
+template<> test_loggerf make_logger<test_loggerf>(const std::string& ch) { return test_loggerf(ch); }
+template<> test_specific_logger make_logger<test_specific_logger>(const std::string& ch) { return test_specific_logger(ch, ch); }
+
+} // namespace logging
+} // namespace wstux
+
+TEST_F(logging_cpp, logging)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
 
-    ::wstux::logging::manager::clear();
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
 
@@ -91,11 +125,22 @@ TEST(logging_cpp, logging)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
-TEST(logging_cpp, severity_level)
+TEST_F(logging_cpp, logging_specific)
+{
+    using logger_t = ::wstux::logging::logger<test_specific_logger>;
+
+    logger_t root_logger = ::wstux::logging::manager::get_logger<test_specific_logger>("Root");
+    LOG_ERROR(root_logger, "error log " << 42);
+
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
+    const std::string log = root_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
+TEST_F(logging_cpp, severity_level)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
 
-    ::wstux::logging::manager::clear();
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
@@ -113,11 +158,10 @@ TEST(logging_cpp, severity_level)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
-TEST(logging_cpp, channels)
+TEST_F(logging_cpp, channels)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
 
-    ::wstux::logging::manager::clear();
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     logger_t chan_logger = ::wstux::logging::manager::get_logger<test_logger>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
@@ -147,11 +191,10 @@ TEST(logging_cpp, channels)
     EXPECT_TRUE(is_equal_logs(ethalon_chan, log_chan)) << "'" << ethalon_chan << "' != '" << log_chan << "'";
 }
 
-TEST(loggingf, logging)
+TEST_F(loggingf, logging)
 {
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
-    ::wstux::logging::manager::clear();
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
@@ -160,11 +203,10 @@ TEST(loggingf, logging)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
-TEST(loggingf, severity_level)
+TEST_F(loggingf, severity_level)
 {
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
-    ::wstux::logging::manager::clear();
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
     LOGF_ERROR(root_logger, "error log %d", 42);
@@ -182,11 +224,10 @@ TEST(loggingf, severity_level)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
-TEST(loggingf, channels)
+TEST_F(loggingf, channels)
 {
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
-    ::wstux::logging::manager::clear();
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
     logger_t chan_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
@@ -216,12 +257,11 @@ TEST(loggingf, channels)
     EXPECT_TRUE(is_equal_logs(ethalon_chan, log_chan)) << "'" << ethalon_chan << "' != '" << log_chan << "'";
 }
 
-TEST(logging, combo_loggers)
+TEST_F(logging, combo_loggers)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
     using loggerf_t = ::wstux::logging::logger<test_loggerf>;
 
-    ::wstux::logging::manager::clear();
     logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
     loggerf_t chan_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
