@@ -78,25 +78,5 @@ int lw_timestamp(char* buf, size_t size);
 }
 #endif
 
-#if defined(LOGGINGF_WRAPPER_IMPL)
-    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__)
-#else
-    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        char cur_ts[24];                                                    \
-        lw_timestamp(cur_ts, 24);                                           \
-        logger->p_logger("%s " LOGF_LEVEL(level) " %s: " fmt "\n",          \
-                         cur_ts, logger->channel __VA_OPT__(,) __VA_ARGS__)
-#endif
-
-#define _LOGF(logger, level, fmt, ...)                                      \
-    do {                                                                    \
-        if (! lw_can_log(level) || ! lw_can_channel_log(logger, level)) {   \
-            break;                                                          \
-        }                                                                   \
-        _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \
-    }                                                                       \
-    while (0)
-
 #endif /* _LIBS_LOGGINGF_WRAPPER_MANAGER_H_ */
 
