@@ -251,7 +251,7 @@ logger<TLogger> manager::get_logger(const std::string& channel)
  */
 #if defined(LOGGINGF_WRAPPER_IMPL)
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        LOGGINGF_WRAPPER_IMPL(logger.get_logger(), level, __VA_ARGS__)
+        LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__)
 #else
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
@@ -276,7 +276,7 @@ logger<TLogger> manager::get_logger(const std::string& channel)
  */
 #if defined(LOGGING_WRAPPER_IMPL)
     #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
-        LOGGING_WRAPPER_IMPL(logger.get_logger(), level)
+        LOGGING_WRAPPER_IMPL(logger, level)
 #else
     #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
         logger.get_logger() << ::wstux::logging::details::timestamp() << " "\

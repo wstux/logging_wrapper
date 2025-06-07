@@ -80,7 +80,7 @@ int timestamp(char* buf, size_t size);
 
 #if defined(LOGGINGF_WRAPPER_IMPL)
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        LOGGINGF_WRAPPER_IMPL(logger->p_logger, level, __VA_ARGS__)
+        LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__)
 #else
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
