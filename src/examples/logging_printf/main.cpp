@@ -56,6 +56,6 @@ int main()
     logger_t root_logger = ::wstux::logging::manager::get_logger<clog_backend_t>("Root");
     LOGF_INFO(root_logger, "Hello, world!");
 
-    ::wstux::logging::manager::clear();
+    ::wstux::logging::manager::deinit();
     return 0;
 }

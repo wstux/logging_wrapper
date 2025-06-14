@@ -46,14 +46,15 @@ void manager::logger_holder::set_level(severity_level lvl)
 ////////////////////////////////////////////////////////////////////////////////
 // class manager definition
 
-void manager::clear()
+void manager::deinit()
 {
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     m_loggers_map.erase(m_loggers_map.begin(), m_loggers_map.end());
 }
 
-void manager::init()
+void manager::init(severity_level global_lvl)
 {
+    set_global_level(global_lvl);
 }
 
 manager::logger_holder::ptr manager::register_logger(const std::string& channel, severity_level lvl)

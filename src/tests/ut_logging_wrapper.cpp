@@ -94,7 +94,7 @@ class logging_fixture : public ::testing::Test
 {
 public:
     virtual void SetUp() override { ::wstux::logging::manager::init(); }
-    virtual void TearDown() override { ::wstux::logging::manager::clear(); }
+    virtual void TearDown() override { ::wstux::logging::manager::deinit(); }
 };
 
 using logging_cpp = logging_fixture;

@@ -144,14 +144,14 @@ class manager final
 public:
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
 
-    static void clear();
+    static void deinit();
 
     template<typename TLogger>
     static logger<TLogger> get_logger(const std::string& channel);
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init();
+    static void init(severity_level global_lvl = severity_level::warning);
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
