@@ -82,26 +82,20 @@ macro(LibTarget TARGET_NAME)
     set_property(DIRECTORY PROPERTY ${TARGET_NAME}_INCLUDE_DIR  ${_include_dir})
 
     if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE}
+        )
     endif()
 
     _configure_target(${TARGET_NAME})
 
-    if (${TARGET_NAME}_SHARED)
-        set_target_properties(${TARGET_NAME}
-            PROPERTIES
-                LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        )
-    elseif (${TARGET_NAME}_STATIC)
-        set_target_properties(${TARGET_NAME}
-            PROPERTIES
-                ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/arch"
-        )
-    endif()
-
     set_target_properties(${TARGET_NAME} PROPERTIES
-        OUTPUT_NAME ${TARGET_NAME}
-        PUBLIC_HEADER "${_public_headers}"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+    )
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        OUTPUT_NAME     ${TARGET_NAME}
+        PUBLIC_HEADER   "${_public_headers}"
     )
     install(TARGETS ${TARGET_NAME}
         EXPORT ${TARGET_NAME}-targets
@@ -124,14 +118,15 @@ macro(ExecTarget TARGET_NAME)
     )
 
     if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE}
+        )
     endif()
 
     _configure_target(${TARGET_NAME})
 
-    set_target_properties(${TARGET_NAME}
-        PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     )
 endmacro()
 
@@ -152,9 +147,13 @@ macro(TestTarget TARGET_NAME)
     add_executable(${TARGET_NAME}
         ${${TARGET_NAME}_HEADERS} ${${TARGET_NAME}_SOURCES}
     )
+
     if ("${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "C" OR "${${TARGET_NAME}_LINKER_LANGUAGE}" STREQUAL "CXX")
-        set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE})
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            LINKER_LANGUAGE ${${TARGET_NAME}_LINKER_LANGUAGE}
+        )
     endif()
+
     _configure_target(${TARGET_NAME})
 
     if (${_enable_autorun})
@@ -169,9 +168,8 @@ macro(TestTarget TARGET_NAME)
         VERBATIM
     )
 
-    set_target_properties(${TARGET_NAME}
-        PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${_target_dir}"
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${_target_dir}"
     )
 endmacro()
 

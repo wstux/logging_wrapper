@@ -45,18 +45,12 @@ endif()
 # Definitions
 ################################################################################
 
-message(STATUS "[INFO ] CMAKE_BINARY_DIR: '${CMAKE_BINARY_DIR}'")
-# Common options
-# To write if need.
+SetOutputDirectory(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+SetOutputDirectory(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+SetOutputDirectory(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/arch")
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_LIBRARY_PATH})
 
-# Build options
-option(USE_ADDR_SANITIZER   "Try to use the address sanitizer" OFF)
-option(USE_COVERAGE         "Try to use coverage flag" OFF)
-option(USE_FAST_MATH        "Tell the compiler to use fast math" OFF)
-option(USE_LTO              "Use link-time optimization for release builds" ON)
-option(USE_PEDANTIC         "Tell the compiler to be pedantic" ON)
-option(USE_PTHREAD          "Use pthread library" OFF)
-option(USE_WERROR           "Tell the compiler to make the build fail when warnings are present" ON)
+message(STATUS "[INFO ] CMAKE_BINARY_DIR: '${CMAKE_BINARY_DIR}'")
 
 ################################################################################
 # Configuration options

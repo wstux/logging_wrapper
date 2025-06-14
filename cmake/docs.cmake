@@ -20,49 +20,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+include(custom_targets)
+
 ################################################################################
 # Doxygen
 ################################################################################
 
 find_package(Doxygen OPTIONAL_COMPONENTS dot)
-if(Doxygen_FOUND)
-    set(_in_dirs "")
-    if (EXISTS "${PROJECT_SOURCE_DIR}/README.md")
-    #    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${PROJECT_SOURCE_DIR}/README.md")
+if (Doxygen_FOUND)
+    set(DOXYGEN_HAVE_DOT "NO")
+    if (Doxygen_dot_FOUND)
+        set(DOXYGEN_HAVE_DOT "YES")
     endif()
 
-    set(_working_dir "${CMAKE_BINARY_DIR}/docs/doxygen")
-    execute_process(COMMAND bash -c "mkdir -p ${_working_dir}")
+    set(_working_dir "${CMAKE_BINARY_DIR}/doc")
+    set(DOXYGEN_OUTPUT_DIRECTORY "${_working_dir}")
 
-    set(DOXYGEN_QUIET               YES)
-    set(DOXYGEN_CALLER_GRAPH        YES)
-    set(DOXYGEN_CALL_GRAPH          YES)
-    set(DOXYGEN_EXTRACT_ALL         YES)
-    set(DOXYGEN_GENERATE_TREEVIEW   YES)
-    set(DOXYGEN_DOT_IMAGE_FORMAT    svg)
-    set(DOXYGEN_DOT_TRANSPARENT     YES)
-    set(DOXYGEN_GENERATE_HTML       YES)
-    set(DOXYGEN_GENERATE_MAN        NO)
-    set(DOXYGEN_OUTPUT_DIRECTORY    "${_working_dir}")
+    configure_file(doc/Doxyfile.in Doxyfile @ONLY)
 
-    set(_in_dirs "")
-    #if (EXISTS "${PROJECT_SOURCE_DIR}/README.md")
-    #    set(_in_dirs ${_in_dirs} "${PROJECT_SOURCE_DIR}/README.md")
-    #endif()
-    if (EXISTS "${PROJECT_SOURCE_DIR}/drivers")
-        set(_in_dirs ${_in_dirs} "${PROJECT_SOURCE_DIR}/drivers")
-    endif()
-    if (EXISTS "${PROJECT_SOURCE_DIR}/include")
-        set(_in_dirs ${_in_dirs} "${PROJECT_SOURCE_DIR}/include")
-    endif()
-    if (EXISTS "${PROJECT_SOURCE_DIR}/src")
-        set(_in_dirs ${_in_dirs} "${PROJECT_SOURCE_DIR}/src")
-    endif()
+    #set(DOXYGEN_QUIET               YES)
+    #set(DOXYGEN_CALLER_GRAPH        YES)
+    #set(DOXYGEN_CALL_GRAPH          YES)
+    #set(DOXYGEN_EXTRACT_ALL         YES)
+    #set(DOXYGEN_GENERATE_TREEVIEW   YES)
+    #set(DOXYGEN_DOT_IMAGE_FORMAT    svg)
+    #set(DOXYGEN_DOT_TRANSPARENT     YES)
+    #set(DOXYGEN_GENERATE_HTML       YES)
+    #set(DOXYGEN_GENERATE_MAN        NO)
+    #set(DOXYGEN_OUTPUT_DIRECTORY    "${_working_dir}")
 
-    #execute_process(COMMAND bash -c "mkdir -p ${_working_dir}")
-
-    doxygen_add_docs(doxygen_docs ALL ${_in_dirs}
-        WORKING_DIRECTORY "${_working_dir}"
-        COMMENT "Generating documentation: ${_working_dir}/html/index.html")
+    CustomCommand(OUTPUT doxygen_html
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${_working_dir}
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/html
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../
+    )
+    CustomTarget(doxygen_doc DEPENDS doxygen_html)
+    #install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+    #    DESTINATION ${DOC_INSTALL_DIR}
+    #    COMPONENT doc)
 endif()
 
