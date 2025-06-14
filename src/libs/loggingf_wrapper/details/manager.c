@@ -38,6 +38,7 @@ struct _lw_hash_node
 {
     hash_node_t* p_next;
     _lw_loggerf_t logger;
+    int channel_length;
 };
 
 struct _lw_loggingf_manager
@@ -86,7 +87,7 @@ static _lw_loggerf_t* get_logger_dynamic_size(const char* channel)
 
     hash_node_t** p_node;
     for (p_node = &g_p_manager->p_bucket[i]; *p_node != NULL; p_node = &(*p_node)->p_next) {
-        if ((*p_node)->logger._length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
+        if ((*p_node)->channel_length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
             return &(*p_node)->logger;
         }
     }
@@ -105,7 +106,7 @@ static _lw_loggerf_t* get_logger_dynamic_size(const char* channel)
                 continue;
             }
             for (hash_node_t* p_old_node = g_p_manager->p_bucket[i]; p_old_node != NULL;) {
-                hash = hash_fn(p_old_node->logger.channel, p_old_node->logger._length);
+                hash = hash_fn(p_old_node->logger.channel, p_old_node->channel_length);
                 p_node = &p_bucket[hash % capacity];
                 while (*p_node != NULL) {
                     p_node = &(*p_node)->p_next;
@@ -129,7 +130,7 @@ static _lw_loggerf_t* get_logger_dynamic_size(const char* channel)
     (*p_node)->logger.level = _CHANNEL_LOG_LEVEL_DFL;
     memcpy((*p_node)->logger.channel, channel, length);
     (*p_node)->logger.channel[length] = '\0';
-    (*p_node)->logger._length = length;
+    (*p_node)->channel_length = length;
     return &(*p_node)->logger;
 }
 
@@ -146,7 +147,7 @@ static _lw_loggerf_t* get_logger_fixed_size(const char* channel)
 
     hash_node_t** p_node;
     for (p_node = &g_p_manager->p_bucket[i]; *p_node != NULL; p_node = &(*p_node)->p_next) {
-        if ((*p_node)->logger._length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
+        if ((*p_node)->channel_length == length && memcmp((*p_node)->logger.channel, channel, length) == 0) {
             return &(*p_node)->logger;
         }
     }
@@ -165,7 +166,7 @@ static _lw_loggerf_t* get_logger_fixed_size(const char* channel)
     (*p_node)->logger.level = _CHANNEL_LOG_LEVEL_DFL;
     memcpy((*p_node)->logger.channel, channel, length);
     (*p_node)->logger.channel[length] = '\0';
-    (*p_node)->logger._length = length;
+    (*p_node)->channel_length = length;
     return &(*p_node)->logger;
 }
 

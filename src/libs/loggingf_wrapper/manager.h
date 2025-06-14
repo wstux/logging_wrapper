@@ -48,7 +48,6 @@ struct lw_loggerf
     lw_loggerf_fn_t p_logger;
     volatile sig_atomic_t level;
     char channel[LOG_CHANNEL_LEN];
-    int _length;
 };
 
 typedef const struct lw_loggerf*    lw_loggerf_t;
