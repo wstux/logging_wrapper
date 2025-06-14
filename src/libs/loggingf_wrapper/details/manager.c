@@ -48,7 +48,7 @@ struct _lw_loggingf_manager
     size_t capacity;
     hash_node_t* p_pool;
     _lw_loggerf_t* p_root_logger;
-    loggerf_fn_t logger_fn;
+    lw_loggerf_fn_t logger_fn;
     get_logger_fn_t get_logger_fn;
 };
 
@@ -178,7 +178,7 @@ bool lw_can_log(int lvl)
     return g_p_manager->global_lvl >= lvl;
 }
 
-bool lw_can_channel_log(loggerf_t p_logger, int lvl)
+bool lw_can_channel_log(lw_loggerf_t p_logger, int lvl)
 {
     if (p_logger == NULL) {
         return false;
@@ -189,20 +189,20 @@ bool lw_can_channel_log(loggerf_t p_logger, int lvl)
     return p_logger->level >= lvl;
 }
 
-loggerf_t lw_get_logger(const char* channel)
+lw_loggerf_t lw_get_logger(const char* channel)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->get_logger_fn(channel);
 }
 
-severity_level_t lw_global_level(void)
+lw_severity_level_t lw_global_level(void)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->global_lvl;
 }
 
-bool lw_init_logging(loggerf_fn_t p_logger_fn, logging_policy_t policy, size_t channel_count,
-                     severity_level_t dfl_lvl, const char* p_root_ch)
+bool lw_init_logging(lw_loggerf_fn_t p_logger_fn, lw_logging_policy_t policy, size_t channel_count,
+                     lw_severity_level_t dfl_lvl, const char* p_root_ch)
 {
     assert(g_p_manager == NULL && "Logging manager is initialized");
     assert(p_logger_fn != NULL);
@@ -282,21 +282,21 @@ bool lw_deinit_logging(void)
     return true;
 }
 
-loggerf_t lw_root_logger(void)
+lw_loggerf_t lw_root_logger(void)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     return g_p_manager->p_root_logger;
 }
 
-void lw_set_global_level(severity_level_t lvl)
+void lw_set_global_level(lw_severity_level_t lvl)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     g_p_manager->global_lvl = lvl;
 }
 
-void lw_set_logger_level(const char* channel, severity_level_t lvl)
+void lw_set_logger_level(const char* channel, lw_severity_level_t lvl)
 {
-    assert(g_p_manager != NULL && "Loggi, logging_policy_t policyng manager is not initialized");
+    assert(g_p_manager != NULL && "Logging, lw_logging_policy_t policy manager is not initialized");
 
     _lw_loggerf_t* p_logger = g_p_manager->get_logger_fn(channel);
     if (p_logger != NULL) {

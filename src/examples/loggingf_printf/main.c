@@ -32,7 +32,7 @@ int main()
         return 1;
     }
 
-    loggerf_t root_logger = lw_get_logger("Root");
+    lw_loggerf_t root_logger = lw_get_logger("Root");
     LOGF_INFO(root_logger, "Hello, world!");
 
     lw_deinit_logging();
