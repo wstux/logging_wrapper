@@ -53,7 +53,7 @@ int main()
 {
     ::wstux::logging::manager::init();
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<clog_backend_t>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOGF_INFO(root_logger, "Hello, world!");
 
     ::wstux::logging::manager::deinit();

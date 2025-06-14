@@ -147,7 +147,7 @@ public:
     static void deinit();
 
     template<typename TLogger>
-    static logger<TLogger> get_logger(const std::string& channel);
+    static TLogger get_logger(const std::string& channel);
 
     static severity_level global_level() { return m_global_level; }
 
@@ -224,9 +224,10 @@ std::shared_ptr<TLogger> manager::logger_holder::get_logger()
 // class manager definition
 
 template<typename TLogger>
-logger<TLogger> manager::get_logger(const std::string& channel)
+TLogger manager::get_logger(const std::string& channel)
 {
-    using logger_impl_t = details::logger_impl<TLogger>;
+    using logger_type_t = typename TLogger::logger_type;
+    using logger_impl_t = details::logger_impl<logger_type_t>;
 
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     logger_holder::map::iterator it = m_loggers_map.find(channel);
@@ -237,7 +238,7 @@ logger<TLogger> manager::get_logger(const std::string& channel)
     } else {
         p_holder = it->second;
     }
-    return logger<TLogger>(p_holder->get_logger<logger_impl_t>());
+    return TLogger(p_holder->get_logger<logger_impl_t>());
 }
 
 } // namespace logging
