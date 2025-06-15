@@ -51,7 +51,7 @@ template<> clog_backend_t make_logger<clog_backend_t>(const std::string&) { retu
 
 int main()
 {
-    ::wstux::logging::manager::init();
+    ::wstux::logging::manager::init(::wstux::logging::severity_level::debug);
 
     logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOGF_INFO(root_logger, "Hello, world!");

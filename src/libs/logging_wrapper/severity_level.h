@@ -82,7 +82,7 @@ enum severity_level
 } // namespace logging
 } // namespace wstux
 
-#define _SEVERITY_LEVEL(level)  ((::wstux::logging::severity_level)level)
+#define SEVERITY_LEVEL(level)  ((::wstux::logging::severity_level)level)
 
 #endif /* _LIBS_LOGGING_WRAPPER_SEVERITY_LEVEL_H_ */
 
