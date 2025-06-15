@@ -1,3 +1,4 @@
+add_subdirectory(logging_boost)
 add_subdirectory(logging_clog)
 add_subdirectory(logging_printf)
 add_subdirectory(loggingf_printf)
