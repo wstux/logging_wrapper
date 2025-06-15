@@ -27,8 +27,3 @@ include(sanitizers)
 include(static_analysis)
 include(utils)
 
-function(SetOutputDirectory DIR_VARIABLE VALUE)
-    set(${DIR_VARIABLE} "${VALUE}")
-    file(MAKE_DIRECTORY ${${DIR_VARIABLE}})
-endfunction()
-
