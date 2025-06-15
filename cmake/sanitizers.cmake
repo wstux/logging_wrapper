@@ -20,41 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-include(build_utils)
-
-function(Sanitizers)
-    set(_name       Sanitizers)
-    set(_flags_kw   ADDRESS LEAK UNDEFINED_BEHAVIOR THREAD)
-    set(_values_kw  )
-    set(_lists_kw   )
-    _parse_target_args(${_name} _flags_kw _values_kw _lists_kw ${ARGN})
-
+function(EnableSanitizers ADDRESS LEAK UNDEFINED_BEHAVIOR THREAD)
     set(_sanitizers "")
 
-    if (${_name}_ADDRESS)
+    if (ADDRESS)
+        message(INFO "Building project with address sanitizer")
         list(APPEND _sanitizers "address")
     endif()
 
-    if (${_name}_LEAK)
+    if (LEAK)
+    message(INFO "Building project with leak sanitizer")
         list(APPEND _sanitizers "leak")
     endif()
 
-    if (${_name}_UNDEFINED_BEHAVIOR)
+    if (UNDEFINED_BEHAVIOR)
+        message(INFO "Building project with behavior sanitizer")
         list(APPEND _sanitizers "undefined")
     endif()
 
-    if (${_name}_THREAD)
-        if (${_name}_ADDRESS OR ${_name}_LEAK)
+    if (THREAD)
+        if (ADDRESS OR LEAK)
             message(WARNING "Thread sanitizer does not work with address and leak sanitizer")
         else()
+            message(INFO "Building project with thread sanitizer")
             list(APPEND _sanitizers "thread")
         endif()
     endif()
 
     list(JOIN _sanitizers "," _sanitizers)
     if (_sanitizers)
-        #target_compile_options(${project_name} INTERFACE -fsanitize=${_sanitizers})
-        #target_link_options(${project_name} INTERFACE -fsanitize=${_sanitizers})
         add_compile_options(-fsanitize=${_sanitizers})
         add_link_options(-fsanitize=${_sanitizers})
     endif()

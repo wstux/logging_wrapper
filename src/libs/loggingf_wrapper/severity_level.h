@@ -75,7 +75,7 @@ enum lw_severity_level
     trace   = LVL_TRACE
 };
 
-#define _SEVERITY_LEVEL(level)  ((enum lw_severity_level)level)
+#define SEVERITY_LEVEL(level)  ((enum lw_severity_level)level)
 
 #if defined(__cplusplus)
 }

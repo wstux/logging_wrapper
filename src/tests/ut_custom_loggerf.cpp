@@ -72,8 +72,8 @@ using loggingf = logging_fixture;
 
 TEST_F(loggingf, logging)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::debug, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::debug, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
@@ -84,8 +84,8 @@ TEST_F(loggingf, logging)
 
 TEST_F(loggingf, logging_dynamic)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 1, severity_level_t::debug, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 1, lw_severity_level_t::debug, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
@@ -96,8 +96,8 @@ TEST_F(loggingf, logging_dynamic)
 
 TEST_F(loggingf, severity_level)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::crit, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
     EXPECT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -106,7 +106,7 @@ TEST_F(loggingf, severity_level)
     std::string log = g_test_loggerf.str();
     EXPECT_TRUE(ethalon == log) << "'" << ethalon << "' != '" << log << "'";
 
-    lw_set_global_level(severity_level_t::info);
+    lw_set_global_level(lw_severity_level_t::info);
     LOGF_ERROR(root_logger, "error log %d", 42);
     ethalon = "[CRIT ] Root: crit log 42\n"
               "[ERROR] Root: error log 42\n";
@@ -116,20 +116,20 @@ TEST_F(loggingf, severity_level)
 
 TEST_F(loggingf, channels)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 2, severity_level_t::crit, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
-    loggerf_t chan_logger = lw_get_logger("Channel");
-    lw_set_global_level(severity_level_t::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 2, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+    lw_loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(lw_severity_level_t::debug);
 
-    lw_set_logger_level("Root", severity_level_t::info);
-    lw_set_logger_level("Channel", severity_level_t::error);
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    lw_set_logger_level("Channel", lw_severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    lw_set_logger_level("Root", severity_level_t::crit);
-    lw_set_logger_level("Channel", severity_level_t::crit);
+    lw_set_logger_level("Root", lw_severity_level_t::crit);
+    lw_set_logger_level("Channel", lw_severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -146,20 +146,20 @@ TEST_F(loggingf, channels)
 
 TEST_F(loggingf, channels_dynamic)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level_t::crit, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
-    loggerf_t chan_logger = lw_get_logger("Channel");
-    lw_set_global_level(severity_level_t::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 2, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+    lw_loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(lw_severity_level_t::debug);
 
-    lw_set_logger_level("Root", severity_level_t::info);
-    lw_set_logger_level("Channel", severity_level_t::error);
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    lw_set_logger_level("Channel", lw_severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    lw_set_logger_level("Root", severity_level_t::crit);
-    lw_set_logger_level("Channel", severity_level_t::crit);
+    lw_set_logger_level("Root", lw_severity_level_t::crit);
+    lw_set_logger_level("Channel", lw_severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -176,20 +176,20 @@ TEST_F(loggingf, channels_dynamic)
 
 TEST_F(loggingf, channels_limit)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::fixed_size, 1, severity_level_t::crit, NULL));
-    loggerf_t root_logger = lw_get_logger("Root");
-    loggerf_t chan_logger = lw_get_logger("Channel");
-    lw_set_global_level(severity_level_t::debug);
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+    lw_loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(lw_severity_level_t::debug);
 
-    lw_set_logger_level("Root", severity_level_t::info);
-    lw_set_logger_level("Channel", severity_level_t::error);
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    lw_set_logger_level("Channel", lw_severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    lw_set_logger_level("Root", severity_level_t::crit);
-    lw_set_logger_level("Channel", severity_level_t::crit);
+    lw_set_logger_level("Root", lw_severity_level_t::crit);
+    lw_set_logger_level("Channel", lw_severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
@@ -204,24 +204,24 @@ TEST_F(loggingf, channels_limit)
 
 TEST_F(loggingf, channels_dynamic_hash)
 {
-    EXPECT_TRUE(lw_init_logging(log_fn, logging_policy_t::dynamic_size, 2, severity_level_t::crit, NULL));
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 2, lw_severity_level_t::crit, NULL));
     for (size_t i = 0; i < 64; ++ i) {
         std::string ch_name = "Channel_" + std::to_string(i);
         lw_get_logger(ch_name.c_str());
     }
-    loggerf_t root_logger = lw_get_logger("Root");
-    loggerf_t chan_logger = lw_get_logger("Channel");
-    lw_set_global_level(severity_level_t::debug);
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+    lw_loggerf_t chan_logger = lw_get_logger("Channel");
+    lw_set_global_level(lw_severity_level_t::debug);
 
-    lw_set_logger_level("Root", severity_level_t::info);
-    lw_set_logger_level("Channel", severity_level_t::error);
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    lw_set_logger_level("Channel", lw_severity_level_t::error);
     LOGF_INFO(root_logger, "info log %d", 42);
     LOGF_INFO(chan_logger, "info log %d", 42);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
 
-    lw_set_logger_level("Root", severity_level_t::crit);
-    lw_set_logger_level("Channel", severity_level_t::crit);
+    lw_set_logger_level("Root", lw_severity_level_t::crit);
+    lw_set_logger_level("Channel", lw_severity_level_t::crit);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_ERROR(chan_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);

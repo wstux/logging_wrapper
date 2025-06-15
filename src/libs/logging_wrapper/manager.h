@@ -89,13 +89,6 @@ struct logger_impl final : public base_logger
     logger_type logger;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-// free functions
-
-int timestamp(char* buf, size_t size);
-
-std::string timestamp();
-
 } // namespace details
 
 class manager;
@@ -151,20 +144,24 @@ class manager final
 public:
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
 
-    static void clear();
+    static void deinit();
 
     template<typename TLogger>
-    static logger<TLogger> get_logger(const std::string& channel);
+    static TLogger get_logger(const std::string& channel);
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init();
+    static void init(severity_level global_lvl = severity_level::warning);
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
     static void set_global_level(severity_level lvl);
 
     static void set_logger_level(const std::string& channel, severity_level lvl);
+
+    static int timestamp(char* buf, size_t size);
+
+    static std::string timestamp();
 
 private:
     using base_logger_t = details::base_logger;
@@ -227,9 +224,10 @@ std::shared_ptr<TLogger> manager::logger_holder::get_logger()
 // class manager definition
 
 template<typename TLogger>
-logger<TLogger> manager::get_logger(const std::string& channel)
+TLogger manager::get_logger(const std::string& channel)
 {
-    using logger_impl_t = details::logger_impl<TLogger>;
+    using logger_type_t = typename TLogger::logger_type;
+    using logger_impl_t = details::logger_impl<logger_type_t>;
 
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     logger_holder::map::iterator it = m_loggers_map.find(channel);
@@ -240,59 +238,11 @@ logger<TLogger> manager::get_logger(const std::string& channel)
     } else {
         p_holder = it->second;
     }
-    return logger<TLogger>(p_holder->get_logger<logger_impl_t>());
+    return TLogger(p_holder->get_logger<logger_impl_t>());
 }
 
 } // namespace logging
 } // namespace wstux
-
-/*
- * Logging for loggers in C-style
- */
-#if defined(LOGGINGF_WRAPPER_IMPL)
-    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__)
-#else
-    #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
-        char cur_ts[24];                                                    \
-        ::wstux::logging::details::timestamp(cur_ts, 24);                   \
-        logger.get_logger()("%s " LOGF_LEVEL(level) " %s: " fmt "\n",       \
-                            cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
-#endif
-
-#define _LOGF(logger, level, fmt, ...)                                      \
-    do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
-            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
-            break;                                                          \
-        }                                                                   \
-        _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__);            \
-    }                                                                       \
-    while (0)
-
-
-/*
- * Logging for loggers in CPP-style
- */
-#if defined(LOGGING_WRAPPER_IMPL)
-    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
-        LOGGING_WRAPPER_IMPL(logger, level)
-#else
-    #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
-        logger.get_logger() << ::wstux::logging::details::timestamp() << " "\
-                            << LOG_LEVEL(level) << " " << logger.channel()  \
-                            << ": "
-#endif
-
-#define _LOG(logger, level, VARS)                                           \
-    do {                                                                    \
-        if (! ::wstux::logging::manager::cal_log(_SEVERITY_LEVEL(level)) || \
-            ! logger.can_log(_SEVERITY_LEVEL(level))) {                     \
-            break;                                                          \
-        }                                                                   \
-        _LOGGING_WRAPPER_IMPL(logger, level) << VARS << std::endl;          \
-    }                                                                       \
-    while (0)
 
 #endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
 

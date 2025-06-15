@@ -94,7 +94,7 @@ class logging_fixture : public ::testing::Test
 {
 public:
     virtual void SetUp() override { ::wstux::logging::manager::init(); }
-    virtual void TearDown() override { ::wstux::logging::manager::clear(); }
+    virtual void TearDown() override { ::wstux::logging::manager::deinit(); }
 };
 
 using logging_cpp = logging_fixture;
@@ -117,7 +117,7 @@ TEST_F(logging_cpp, logging)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
@@ -129,7 +129,7 @@ TEST_F(logging_cpp, logging_specific)
 {
     using logger_t = ::wstux::logging::logger<test_specific_logger>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_specific_logger>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
@@ -142,7 +142,7 @@ TEST_F(logging_cpp, severity_level)
     using logger_t = ::wstux::logging::logger<test_logger>;
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOG_ERROR(root_logger, "error log " << 42);
     LOG_CRIT(root_logger, "crit log " << 42);
 
@@ -162,8 +162,8 @@ TEST_F(logging_cpp, channels)
 {
     using logger_t = ::wstux::logging::logger<test_logger>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
-    logger_t chan_logger = ::wstux::logging::manager::get_logger<test_logger>("Channel");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    logger_t chan_logger = ::wstux::logging::manager::get_logger<logger_t>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
@@ -195,7 +195,7 @@ TEST_F(loggingf, logging)
 {
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
@@ -208,7 +208,7 @@ TEST_F(loggingf, severity_level)
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
 
@@ -228,8 +228,8 @@ TEST_F(loggingf, channels)
 {
     using logger_t = ::wstux::logging::logger<test_loggerf>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Root");
-    logger_t chan_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Channel");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    logger_t chan_logger = ::wstux::logging::manager::get_logger<logger_t>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
@@ -262,8 +262,8 @@ TEST_F(logging, combo_loggers)
     using logger_t = ::wstux::logging::logger<test_logger>;
     using loggerf_t = ::wstux::logging::logger<test_loggerf>;
 
-    logger_t root_logger = ::wstux::logging::manager::get_logger<test_logger>("Root");
-    loggerf_t chan_logger = ::wstux::logging::manager::get_logger<test_loggerf>("Channel");
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    loggerf_t chan_logger = ::wstux::logging::manager::get_logger<loggerf_t>("Channel");
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
 
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
