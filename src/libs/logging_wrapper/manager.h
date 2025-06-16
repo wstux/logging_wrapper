@@ -103,7 +103,7 @@ class manager;
  *              stream-like and printf-like loggers.
  *
  *  \code
- *      logger<logger_t> logger = manager::get_logger<logger_t>("Root");
+ *      logger_t logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
  *      LOG_INFO(logger, "message");
  *  \endcode
  */
@@ -142,6 +142,8 @@ private:
 class manager final
 {
 public:
+    using init_fn_t = std::function<void()>;
+
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
 
     static void deinit();
@@ -151,7 +153,7 @@ public:
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init(severity_level global_lvl = severity_level::warning);
+    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = init_fn_t());
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 

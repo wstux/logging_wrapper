@@ -105,8 +105,7 @@ using logger_t = ::wstux::logging::logger<::wstux::logging::boost_logger_t>;
 
 int main()
 {
-    init_logging();
-    ::wstux::logging::manager::init(::wstux::logging::severity_level::debug);
+    ::wstux::logging::manager::init(::wstux::logging::severity_level::debug, init_logging);
 
     logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
     LOG_NOTICE(root_logger, "Hello, world!");
