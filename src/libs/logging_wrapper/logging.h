@@ -22,13 +22,42 @@
 #include "logging_wrapper/manager.h"
 #include "logging_wrapper/severity_level.h"
 
-/*
- * Logging for loggers in C-style
- */
+/*******************************************************************************
+ *  Logging for loggers in C-style
+ ******************************************************************************/
 #if defined(LOGGINGF_WRAPPER_IMPL)
+    /**
+     *  \brief  User's logging implementation.
+     *
+     *  Calling a custom logging implementation. The logger and the required
+     *  logging level are passed to the custom logging implementation.
+     *
+     *  \code
+     *  #define LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                  \
+     *      char cur_ts[24];                                                    \
+     *      ::wstux::logging::manager::timestamp(cur_ts, 24);                   \
+     *      logger.get_logger()("%s " LOGF_LEVEL(level) " %s: " fmt "\n",       \
+     *                          cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
+     *
+     *  #include <logging_wrapper/logging.h>
+     *  \endcode
+     */
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         LOGGINGF_WRAPPER_IMPL(logger, level, fmt, __VA_ARGS__)
 #else
+    /**
+     *  \brief  Default logging implementation.
+     *
+     *  By default, a log line is generated in the format:
+     *
+     *      ****-**-** **:**:**.*** [S_LVL] Channel: message
+     *
+     *  Where,
+     *  ****-**-** **:**:**.*** - time stamp in format yyyy-mm-dd HH:MM:SS.mmm;
+     *  S_LVL - severity level;
+     *  Channel - channel name;
+     *  message - user's message.
+     */
     #define _LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)                 \
         char cur_ts[24];                                                    \
         ::wstux::logging::manager::timestamp(cur_ts, 24);                   \
@@ -36,6 +65,19 @@
                             cur_ts, logger.channel().c_str() __VA_OPT__(,) __VA_ARGS__)
 #endif
 
+/**
+ *  \brief  The macro writes a record to the log.
+ *  \param  logger - C-style logger for recording.
+ *  \param  level - the required logging level.
+ *  \param  fmt - message format.
+ *
+ *  \attention  The message is evaluated only if the current application logging
+ *      level satisfies the required logging level.
+ *
+ *  \details    The macro first checks the global logging level. If the check is
+ *      positive, the channel logging level is checked. After the channel logging
+ *      level is successfully checked, the message is transferred to the logger.
+ */
 #define _LOGF(logger, level, fmt, ...)                                      \
     do {                                                                    \
         if (! ::wstux::logging::manager::cal_log(SEVERITY_LEVEL(level)) ||  \
@@ -46,19 +88,60 @@
     }                                                                       \
     while (0)
 
-/*
- * Logging for loggers in CPP-style
- */
+/*******************************************************************************
+ *  Logging for loggers in CPP-style
+ ******************************************************************************/
 #if defined(LOGGING_WRAPPER_IMPL)
+    /**
+     *  \brief  User's logging implementation.
+     *
+     *  Calling a custom logging implementation. The logger and the required
+     *  logging level are passed to the custom logging implementation.
+     *
+     *  \code
+     *  #define LOGGING_WRAPPER_IMPL(logger, level)                             \
+     *      logger.get_logger() << ::wstux::logging::manager::timestamp() << " "\
+     *                          << LOG_LEVEL(level) << " " << logger.channel() << ": "
+     *
+     *  #include <logging_wrapper/logging.h>
+     *  \endcode
+     */
     #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
         LOGGING_WRAPPER_IMPL(logger, level)
 #else
+    /**
+     *  \brief  Default logging implementation.
+     *
+     *  By default, a log line is generated in the format:
+     *
+     *      ****-**-** **:**:**.*** [S_LVL] Channel: message
+     *
+     *  Where,
+     *  ****-**-** **:**:**.*** - time stamp in format yyyy-mm-dd HH:MM:SS.mmm;
+     *  S_LVL - severity level;
+     *  Channel - channel name;
+     *  message - user's message.
+     */
     #define _LOGGING_WRAPPER_IMPL(logger, level)                            \
         logger.get_logger() << ::wstux::logging::manager::timestamp() << " "\
                             << LOG_LEVEL(level) << " " << logger.channel()  \
                             << ": "
 #endif
 
+/**
+ *  \brief  The macro writes a record to the log.
+ *  \param  logger - logger for recording.
+ *  \param  level - the required logging level.
+ *  \param  VARS - message.
+ *
+ *  \attention  The VARS expression is evaluated only if the current application
+ *      logging level satisfies the required logging level.
+ *
+ *  The macro first checks the global logging level. If the check is positive,
+ *  the channel logging level is checked. After the channel logging level is
+ *  successfully checked, the logger is called, a message is generated and
+ *  transferred to the logger.
+ */
 #define _LOG(logger, level, VARS)                                           \
     do {                                                                    \
         if (! ::wstux::logging::manager::cal_log(SEVERITY_LEVEL(level)) ||  \
@@ -69,6 +152,11 @@
     }                                                                       \
     while (0)
 
+/**
+ *  \brief  The macro writes a record to the log.
+ *  \param  logger - C-style logger for recording.
+ *  \param  fmt - message format.
+ */
 #define LOGF_EMERG(logger, fmt, ...)        _LOGF(logger, LVL_EMERG,  fmt, __VA_ARGS__)
 #define LOGF_FATAL(logger, fmt, ...)        _LOGF(logger, LVL_FATAL,  fmt, __VA_ARGS__)
 #define LOGF_CRIT(logger, fmt, ...)         _LOGF(logger, LVL_CRIT,   fmt, __VA_ARGS__)
@@ -79,6 +167,11 @@
 #define LOGF_DEBUG(logger, fmt, ...)        _LOGF(logger, LVL_DEBUG,  fmt, __VA_ARGS__)
 #define LOGF_TRACE(logger, fmt, ...)        _LOGF(logger, LVL_TRACE,  fmt, __VA_ARGS__)
 
+/**
+ *  \brief  The macro writes a record to the log.
+ *  \param  logger - logger for recording.
+ *  \param  VARS - message.
+ */
 #define LOG_EMERG(logger, VARS)             _LOG(logger, LVL_EMERG,  VARS)
 #define LOG_FATAL(logger, VARS)             _LOG(logger, LVL_FATAL,  VARS)
 #define LOG_CRIT(logger, VARS)              _LOG(logger, LVL_CRIT,   VARS)

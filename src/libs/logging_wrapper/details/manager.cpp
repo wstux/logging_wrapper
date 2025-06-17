@@ -52,9 +52,14 @@ void manager::deinit()
     m_loggers_map.erase(m_loggers_map.begin(), m_loggers_map.end());
 }
 
-void manager::init(severity_level global_lvl)
+void manager::init(severity_level global_lvl, init_fn_t init_fn)
 {
-    set_global_level(global_lvl);
+    static std::once_flag flag;
+    //set_global_level(global_lvl);
+    std::call_once(flag, [&global_lvl,&init_fn]() {
+                             set_global_level(global_lvl);
+                             init_fn();
+                         });
 }
 
 manager::logger_holder::ptr manager::register_logger(const std::string& channel, severity_level lvl)

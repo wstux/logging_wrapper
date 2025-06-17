@@ -33,6 +33,28 @@
 namespace wstux {
 namespace logging {
 
+/**
+ *  \brief  Declaring a function to create a logger.
+ *  \param  ch - channel name.
+ *  \tparam TLogger - custom logger type.
+ *
+ *  \attention  To use a custom logger, need to specialize this function for that logger.
+ *
+ *  \code
+ *  struct clog_logger final
+ *  {
+ *      template <typename T>
+ *      inline std::ostream& operator<<(const T& val) { return std::clog << val; }
+ *  };
+ *
+ *  namespace wstux { namespace logging {
+ *
+ *  template<>
+ *  clog_logger make_logger<clog_logger>(const std::string&) { return clog_logger(); }
+ *
+ *  }}
+ *  \endcode
+ */
 template<typename TLogger>
 TLogger make_logger(const std::string& ch);
 
@@ -46,19 +68,32 @@ namespace details {
 ////////////////////////////////////////////////////////////////////////////////
 // struct base_logger
 
+/**
+ *  \brief  Base class for wrapping specific loggers.
+ *
+ *  The base class stores the channel name and logging level for this logger. The
+ *  severity level is checked in macros when attempting to write to the log via
+ *  this logger.
+ */
 struct base_logger
 {
     using severity_level_t = std::atomic<severity_level>;
     using ptr = std::shared_ptr<base_logger>;
 
+    /// \brief  Destructor.
     virtual ~base_logger() {}
 
+    /// \brief  Logging level check function.
+    /// \param  lvl - required severity level.
+    /// \return True, if the required severity level corresponds to the requested.
+    ///     Otherwise, false.
     inline bool can_log(severity_level lvl) const { return level >= lvl; }
 
-    const std::string channel;
-    severity_level_t level;
+    const std::string channel;  //< Channel name.
+    severity_level_t level;     //< Severity level for this channel.
 
 protected:
+    /// \brief  Protected constructor.
     base_logger(const std::string& ch, const severity_level lvl)
         : channel(ch)
         , level(lvl)
@@ -72,15 +107,18 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // struct logger_impl
 
+/**
+ *  \brief  Wrapper around specific loggers. The wrapper stores any type of logger.
+ *  \tparam TLogger - custom logger type.
+ */
 template<typename TLogger>
 struct logger_impl final : public base_logger
 {
-    using base = base_logger;
     using logger_type = TLogger;
     using ptr = std::shared_ptr<logger_impl>;
 
     logger_impl(const std::string& channel, severity_level lvl)
-        : base(channel, lvl)
+        : base_logger(channel, lvl)
         , logger(make_logger<logger_type>(channel))
     {}
 
@@ -88,7 +126,9 @@ struct logger_impl final : public base_logger
 
     logger_type logger;
 };
-
+/// \brief  Set the logging level for a specific channel.
+    /// \param  channel - channel name.
+    /// \param  lvl - new logging level.
 } // namespace details
 
 class manager;
@@ -98,13 +138,30 @@ class manager;
 
 /**
  *  \brief  The wrapper around abstract logger.
- *  \details    The wrapper stores any type of logger.The wrapper does not
- *              distinguish between logger types and can work with both
- *              stream-like and printf-like loggers.
+ *  \tparam TLogger - custom logger type.
+ *
+ *  \attention  To use a custom logger, need to specialize this function for that logger.
+ *
+ *  The wrapper stores any type of logger.The wrapper does not distinguish between
+ *  logger types and can work with both stream-like and printf-like loggers.
  *
  *  \code
- *      logger<logger_t> logger = manager::get_logger<logger_t>("Root");
- *      LOG_INFO(logger, "message");
+ *  struct clog_logger final
+ *  {
+ *      template <typename T>
+ *      inline std::ostream& operator<<(const T& val) { return std::clog << val; }
+ *  };
+ *
+ *  namespace wstux { namespace logging {
+ *
+ *  template<>
+ *  clog_logger make_logger<clog_logger>(const std::string&) { return clog_logger(); }
+ *
+ *  }}
+ *
+ *  using logger_t = ::wstux::logging::logger<clog_logger>;
+ *  logger_t logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+ *  LOG_INFO(logger, "message");
  *  \endcode
  */
 template<typename TLogger>
@@ -124,6 +181,8 @@ struct logger final
     typename logger_impl_t::ptr p_logger_impl;
 
 private:
+    /// \brief  Private constructor so that the class can only be created via
+    ///         ::wstux::logging::manager.
     explicit logger(typename logger_impl_t::ptr p_logger)
         : p_logger_impl(p_logger)
     {}
@@ -134,29 +193,45 @@ private:
 
 /**
  *  \brief  Logger manager. Provides access to all registered loggers.
- *  \details
  *
  *  \code
+ *  ::wstux::logging::manager::init(::wstux::logging::severity_level::debug);
+ *  logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+ *  ...
+ *  ::wstux::logging::manager::deinit();
  *  \endcode
  */
 class manager final
 {
 public:
+    using init_fn_t = std::function<void()>;
+
     static bool cal_log(severity_level lvl) { return m_global_level >= lvl; }
 
     static void deinit();
 
+    /// \brief  Logger request.
+    /// \param  channel - channel name.
+    /// \return An existing logger of the specified type. If the logger did not
+    ///     exist, it will be created.
+    /// \tparam TLogger - type of logger requested.
     template<typename TLogger>
     static TLogger get_logger(const std::string& channel);
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init(severity_level global_lvl = severity_level::warning);
+    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = init_fn_t());
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
+    /// \brief  Set the global severity level loggers.
+    /// \param  channel - channel name.
+    /// \param  lvl - new severity level.
     static void set_global_level(severity_level lvl);
 
+    /// \brief  Set the severity level for a specific channel.
+    /// \param  channel - channel name.
+    /// \param  lvl - new severity level.
     static void set_logger_level(const std::string& channel, severity_level lvl);
 
     static int timestamp(char* buf, size_t size);
