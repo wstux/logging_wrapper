@@ -44,13 +44,11 @@ set(EXTERNALS_PREFIX "${CMAKE_BINARY_DIR}/externals")
 ################################################################################
 
 function(_set_command VAR VALUE DFL_VALUE)
-    set(${VAR} "true" PARENT_SCOPE)
+    set(${VAR} "${DFL_VALUE}" PARENT_SCOPE)
     if (${VALUE})
         set(${VAR} bash -c "${${VALUE}}" PARENT_SCOPE)
     endif()
 endfunction()
-
-#file(MAKE_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 ################################################################################
 # Targets
@@ -61,10 +59,11 @@ function(ExternalTarget EXT_TARGET_NAME)
     set(_values_kw  BUILD_COMMAND
                     CONFIGURE_COMMAND
                     INCLUDE_DIR
-                    INSTALL_COMMAND INSTALL_DIR
+                    INSTALL_COMMAND
+                    INSTALL_DIR
                     URL #URL_MD5
     )
-    set(_lists_kw   #DEPENDS
+    set(_lists_kw   DEPENDS
                     LIBRARIES
     )
     _parse_target_args_strings(${EXT_TARGET_NAME}
@@ -84,7 +83,7 @@ function(ExternalTarget EXT_TARGET_NAME)
     set(_install_dir "${${EXT_TARGET_NAME}_INSTALL_DIR}")
     _set_command(_install_command ${EXT_TARGET_NAME}_INSTALL_COMMAND "true")
 
-    set(_depends "")
+    set(_depends "${${EXT_TARGET_NAME}_DEPENDS}")
 
     ExternalProject_Add(${_target_name}
         PREFIX              ${_target_dir}
