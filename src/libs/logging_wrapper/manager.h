@@ -212,11 +212,12 @@ public:
 
     /// \brief  Logger request.
     /// \param  channel - channel name.
+    /// \param  lvl - channel severity level.
     /// \return An existing logger of the specified type. If the logger did not
     ///     exist, it will be created.
     /// \tparam TLogger - type of logger requested.
     template<typename TLogger>
-    static TLogger get_logger(const std::string& channel);
+    static TLogger get_logger(const std::string& channel, severity_level lvl = severity_level::debug);
 
     static severity_level global_level() { return m_global_level; }
 
@@ -263,7 +264,7 @@ private:
     };
 
 private:
-    static logger_holder::ptr register_logger(const std::string& channel, severity_level lvl = severity_level::debug);
+    static logger_holder::ptr register_logger(const std::string& channel, severity_level lvl);
 
 private:
     static severity_level_t m_global_level;
@@ -299,7 +300,7 @@ std::shared_ptr<TLogger> manager::logger_holder::get_logger()
 // class manager definition
 
 template<typename TLogger>
-TLogger manager::get_logger(const std::string& channel)
+TLogger manager::get_logger(const std::string& channel, severity_level lvl)
 {
     using logger_type_t = typename TLogger::logger_type;
     using logger_impl_t = details::logger_impl<logger_type_t>;
@@ -309,7 +310,7 @@ TLogger manager::get_logger(const std::string& channel)
 
     logger_holder::ptr p_holder;
     if (it == m_loggers_map.end()) {
-        p_holder = register_logger(channel);
+        p_holder = register_logger(channel, lvl);
     } else {
         p_holder = it->second;
     }
