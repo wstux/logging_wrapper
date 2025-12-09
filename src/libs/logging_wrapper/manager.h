@@ -221,7 +221,7 @@ public:
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = init_fn_t());
+    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = []() -> void {});
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
