@@ -29,6 +29,7 @@ namespace wstux {
 namespace logging {
 
 manager::severity_level_t manager::m_global_level = {severity_level::info};
+std::atomic_bool manager::m_is_immutable = {false};
 std::recursive_mutex manager::m_loggers_mutex = {};
 manager::logger_holder::map manager::m_loggers_map = {};
 
@@ -56,7 +57,7 @@ void manager::init(severity_level global_lvl, init_fn_t init_fn)
 {
     static std::once_flag flag;
     //set_global_level(global_lvl);
-    std::call_once(flag, [&global_lvl,&init_fn]() {
+    std::call_once(flag, [&global_lvl, init_fn]() -> void {
                              set_global_level(global_lvl);
                              init_fn();
                          });
@@ -73,6 +74,9 @@ manager::logger_holder::ptr manager::register_logger(const std::string& channel,
 
 void manager::set_global_level(severity_level lvl)
 {
+    if (m_is_immutable) {
+        return;
+    }
     if ((lvl < severity_level::emerg) || (lvl > severity_level::trace)) {
         return;
     }
@@ -81,6 +85,10 @@ void manager::set_global_level(severity_level lvl)
 
 void manager::set_logger_level(const std::string& channel, severity_level lvl)
 {
+    if (m_is_immutable) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     logger_holder::map::iterator it = m_loggers_map.find(channel);
     if (it == m_loggers_map.end()) {

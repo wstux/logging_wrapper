@@ -230,6 +230,8 @@ public:
     /// \param  lvl - new severity level.
     static void set_global_level(severity_level lvl);
 
+    static void set_immutable() { m_is_immutable = true;}
+
     /// \brief  Set the severity level for a specific channel.
     /// \param  channel - channel name.
     /// \param  lvl - new severity level.
@@ -268,6 +270,7 @@ private:
 
 private:
     static severity_level_t m_global_level;
+    static std::atomic_bool m_is_immutable;
 
     static std::recursive_mutex m_loggers_mutex;
     static logger_holder::map m_loggers_map;
