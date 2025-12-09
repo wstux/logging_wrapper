@@ -7,14 +7,14 @@ manager that supports channeling.
 ## Contents
 
 * [Description](#description)
-  * [Severity levels](#severity levels)
+  * [Severity levels](#severity_levels)
   * [Manager](#manager)
   * [Logger](#logger)
   * [Macros](#macros)
 * [Build](#build)
 * [Usage](#usage)
-  * [C logging wrapper](#c logging wrapper)
-  * [CPP logging wrapper](#cpp logging wrapper)
+  * [C logging wrapper](#c_logging_wrapper)
+  * [CPP logging wrapper](#cpp_logging_wrapper)
 * [License](#license)
 
 ## Description
