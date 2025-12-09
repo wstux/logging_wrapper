@@ -221,7 +221,7 @@ public:
 
     static severity_level global_level() { return m_global_level; }
 
-    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = init_fn_t());
+    static void init(severity_level global_lvl = severity_level::warning, init_fn_t init_fn = []() -> void {});
 
     static void set_global_level(int lvl) { set_global_level((severity_level)lvl); }
 
@@ -229,6 +229,8 @@ public:
     /// \param  channel - channel name.
     /// \param  lvl - new severity level.
     static void set_global_level(severity_level lvl);
+
+    static void set_immutable() { m_is_immutable = true;}
 
     /// \brief  Set the severity level for a specific channel.
     /// \param  channel - channel name.
@@ -268,6 +270,7 @@ private:
 
 private:
     static severity_level_t m_global_level;
+    static std::atomic_bool m_is_immutable;
 
     static std::recursive_mutex m_loggers_mutex;
     static logger_holder::map m_loggers_map;
