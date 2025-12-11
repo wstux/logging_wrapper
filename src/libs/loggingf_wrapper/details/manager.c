@@ -44,6 +44,7 @@ struct _lw_hash_node
 struct _lw_loggingf_manager
 {
     volatile sig_atomic_t global_lvl;
+    volatile sig_atomic_t is_immutable;
     hash_node_t** p_bucket;
     size_t size;
     size_t capacity;
@@ -220,6 +221,7 @@ bool lw_init_logging(lw_loggerf_fn_t p_logger_fn, lw_logging_policy_t policy, si
     g_p_manager->size = 0;
     g_p_manager->capacity = channel_count;
     g_p_manager->global_lvl = dfl_lvl;
+    g_p_manager->is_immutable = 0;
     g_p_manager->p_bucket = NULL;
     g_p_manager->p_pool = NULL;
     g_p_manager->p_root_logger = NULL;
@@ -292,7 +294,18 @@ lw_loggerf_t lw_root_logger(void)
 void lw_set_global_level(lw_severity_level_t lvl)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
-    g_p_manager->global_lvl = lvl;
+    if (! g_p_manager->is_immutable) {
+        g_p_manager->global_lvl = lvl;
+    }
+}
+
+void lw_set_immutable_global_level(lw_severity_level_t lvl)
+{
+    assert(g_p_manager != NULL && "Logging manager is not initialized");
+    if (! g_p_manager->is_immutable) {
+        lw_set_global_level(lvl);
+        g_p_manager->is_immutable = 1;
+    }
 }
 
 void lw_set_logger_level(const char* channel, lw_severity_level_t lvl)

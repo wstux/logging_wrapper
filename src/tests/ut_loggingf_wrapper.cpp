@@ -247,6 +247,28 @@ TEST_F(loggingf, channels_dynamic_hash)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
+TEST_F(loggingf, immutable)
+{
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+
+    lw_set_global_level(lw_severity_level_t::debug);
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::debug);
+    EXPECT_TRUE(lw_can_channel_log(root_logger, lw_severity_level_t::info));
+
+    lw_set_immutable_global_level(lw_severity_level_t::warning);
+
+    lw_set_global_level(lw_severity_level_t::crit);
+    lw_set_logger_level("Root", lw_severity_level_t::crit);
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::warning);
+    EXPECT_TRUE(lw_can_channel_log(root_logger, lw_severity_level_t::crit));
+
+    lw_set_global_level(lw_severity_level_t::debug);
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::warning);
+
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
     return RUN_ALL_TESTS();

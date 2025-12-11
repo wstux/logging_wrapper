@@ -69,6 +69,8 @@ lw_loggerf_t lw_root_logger(void);
 
 void lw_set_global_level(lw_severity_level_t lvl);
 
+void lw_set_immutable_global_level(lw_severity_level_t lvl);
+
 void lw_set_logger_level(const char* channel, lw_severity_level_t lvl);
 
 int lw_timestamp(char* buf, size_t size);

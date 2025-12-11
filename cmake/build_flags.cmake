@@ -169,7 +169,11 @@ if (CMAKE_CXX_COMPILER)
     endif()
 endif()
 
-# Set common flags
+
+################################################################################
+# Setting common compile flags
+################################################################################
+
 set_flag("-Os -DNDEBUG"     MINSIZEREL)
 set_flag("-O3 -DNDEBUG"     RELEASE)
 set_flag("-O2 -DNDEBUG -g3" RELWITHDEBINFO)
@@ -191,7 +195,10 @@ endif()
 # void __attribute__((visibility("default"))) Exported() {...}
 #try_set_flag(FVISIBILITY_HIDDEN "-fvisibility=hidden")
 
-# Protect stack
+################################################################################
+# Protecting stack
+################################################################################
+
 # try_set_flag(FSTACK_PROTECTOR "-fstack-protector-strong")
 # if (NOT FLAG_FSTACK_PROTECTOR)
 #     try_set_flag(FSTACK_PROTECTOR "-fstack-protector-all")
@@ -200,7 +207,13 @@ endif()
 
 # try_set_flag(FNO_STRICT_OVERFLOW "-fno-strict-overflow")
 
-# Set flags if isset options
+################################################################################
+# Setting coverage compile flags
+################################################################################
+if (COVERAGE)
+    set_flag("-g -O0 --coverage -fprofile-arcs -ftest-coverage")
+    set_linker_flag("-fprofile-arcs -ftest-coverage")
+endif()
 ##try_set_flag_by_opt(USE_COVERAGE    "--coverage -fprofile-arcs -ftest-coverage")
 ##try_set_flag_by_opt(USE_COVERAGE    "--coverage -g -O0")#"-fprofile-arcs -ftest-coverage")
 ##try_set_flag_by_opt(USE_COVERAGE    "-fprofile-arcs")
@@ -212,7 +225,9 @@ endif()
 ##set_flag_by_opt(USE_COVERAGE    "-fprofile-prefix-path=${CMAKE_BINARY_DIR}/coverage")
 #set_linker_flag_by_opt(USE_COVERAGE "-fprofile-arcs -lgcov")
 
-set_linker_flag("-Wl,-rpath=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+################################################################################
+# Set flags if isset options
+################################################################################
 
 set_flag_by_opt(USE_FAST_MAT        "--ffast-math")
 
@@ -222,6 +237,12 @@ set_linker_flag_by_opt(USE_LTO      "-flto=auto")
 set_flag_by_opt(USE_PEDANTIC        "-pedantic")
 set_flag_by_opt(USE_PEDANTIC        "-pedantic-errors")
 set_flag_by_opt(USE_WERROR          "-Werror")
+
+################################################################################
+# Setting linker options
+################################################################################
+
+set_linker_flag("-Wl,-rpath=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 #try_set_flag_by_opt(USE_PTHREAD             "-pthread")
 #if (LINUX)

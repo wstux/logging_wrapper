@@ -5,19 +5,19 @@ cmake_minimum_required (VERSION 3.10)
 ################################################################################
 
 project(logging_wrapper
-        VERSION 1.0.1
+        VERSION 1.0.2
         LANGUAGES CXX C)
 
 ################################################################################
 # Build options
 ################################################################################
 
-option(USE_ADDR_SANITIZER   "Build project with address sanitizer" OFF)
-option(USE_LEAK_SANITIZER   "Build project with leak sanitizer" OFF)
+option(USE_ADDR_SANITIZER       "Build project with address sanitizer" OFF)
+option(USE_LEAK_SANITIZER       "Build project with leak sanitizer" OFF)
 option(USE_BEHAVIOR_SANITIZER   "Build project with undefined behavior sanitizer" OFF)
-option(USE_THREAD_SANITIZER "Build project with thread sanitizer" OFF)
+option(USE_THREAD_SANITIZER     "Build project with thread sanitizer" OFF)
 
-#option(USE_COVERAGE         "Try to use coverage flag" OFF)
+option(COVERAGE             "Try to use coverage flag" OFF)
 option(USE_FAST_MATH        "Tell the compiler to use fast math" OFF)
 option(USE_LTO              "Use link-time optimization for release builds" ON)
 option(USE_PEDANTIC         "Tell the compiler to be pedantic" ON)

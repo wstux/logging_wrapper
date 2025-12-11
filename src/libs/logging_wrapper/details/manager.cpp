@@ -83,12 +83,16 @@ void manager::set_global_level(severity_level lvl)
     m_global_level = lvl;
 }
 
+void manager::set_immutable_global_level(severity_level lvl)
+{
+    if (! m_is_immutable) {
+        set_global_level(lvl);
+        m_is_immutable = true;
+    }
+}
+
 void manager::set_logger_level(const std::string& channel, severity_level lvl)
 {
-    if (m_is_immutable) {
-        return;
-    }
-
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     logger_holder::map::iterator it = m_loggers_map.find(channel);
     if (it == m_loggers_map.end()) {
@@ -129,7 +133,7 @@ std::string manager::timestamp()
     char cur_ts[ts_size];
     timestamp(cur_ts, ts_size);
 
-	return std::string(cur_ts, ts_size - 1);
+    return std::string(cur_ts, ts_size - 1);
 }
 
 } // namespace logging

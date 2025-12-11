@@ -12,6 +12,9 @@ The *cmake_cpp_project_template* assumes you want to setup a project using
 ## Contents
 
 * [Description](#description)
+* [Build](#build)
+  * [Custom build targets](#custom-build-targets)
+  * [Coverage build target](#coverage-build-target)
 * [Usage](#usage)
 * [Targets](#targets)
   * [Libraries](#libraries)
@@ -20,7 +23,6 @@ The *cmake_cpp_project_template* assumes you want to setup a project using
   * [Drivers](#drivers)
   * [Externals](#externals)
   * [Custom targets](#custom-targets)
-* [Build](#build)
 * [License](#license)
 
 ## Description
@@ -30,14 +32,11 @@ last whitespace characters in lines is added. This can lead to errors due to
 empty lines at the end of the file. To fix this error, you need to run the
 command:
 ```
-git config --global core.whitespace -blank-at-eof
+$ git config --global core.whitespace -blank-at-eof
 ```
 
-## Usage
-
-### Build project
-
-The project is built with the `make` command. Assembly takes place in three stages:
+The project is built with the `make` command. Assembly takes place in three
+stages:
 1. the `make` command starts configuring the project with `cmake`;
 2. the project is configured by the `cmake` system;
 3. start building the project/target with `make`.
@@ -47,6 +46,52 @@ The build looks like this:
 user -> make -> cmake -> make
 ```
 
+## Build
+
+The project is built with the `make` command:
+```
+$ make <build_type>/<target_name>
+```
+Supported build types:
+* `release` - release build of the project with optimization enabled in the
+  directory `<repo_dir>/build_release`;
+* `debug` - debug build of the project without optimization in the directory
+  `<repo_dir>/build_debug`.
+
+Making a build without specifying a type results in a build with the release
+build type.
+```
+$ make <target_name>
+```
+
+### Custom build targets
+
+Supported custom build targets:
+* `all` - building of all targets;
+* `clean` - cleaning the build directory, removing all build artifacts and the
+  build directory;
+* `test` - build all unit tests (targets marked as tests) and run the built
+  tests;
+* `<unit_test_name>_run` - building a unit test `<unit_test_name>` and running
+  the built test;
+* `stat_cppcheck` - static analysis of the project's source code using the
+  `cppcheck` utility. The analysis result will be saved in the directory
+  `<build_directory>/lint/cppcheck/report`.
+
+### Coverage build target
+
+Testing code coverage is performed using the command:
+```
+$ make coverage
+```
+
+Executing this command will build the repository, run unit tests, and generate
+code coverage statistics. The build will be performed in `debug` mode in the
+`<repo_dir>/build_coverage` directory. Code test coverage statistics will be
+saved in the `<repo_dir>/build_coverage/__coverage/report` directory.
+
+## Usage
+
 ## Targets
 
 The library supports targets:
@@ -54,7 +99,7 @@ The library supports targets:
 * [ExecTarget](#executables) - building executable files;
 * [TestTarget](#tests) - building tests;
 * [DriverTarget](#drivers) - building kernel modules;
-* [ExternalTarget and WrapperTarget](#externals) - building external modules;
+* [ExternalTarget, FetchTarget and WrapperTarget](#externals) - building external modules;
 * [CustomTarget](#custom-targets) - custom targets.
 
 ### Libraries
@@ -224,6 +269,12 @@ TestTarget(ut_test
 
 ### Drivers
 
+To build a Linux kernel modules, needs to install kernel headers.
+Command for installing kernel headers:
+```
+$ sudo apt-get install linux-headers-$(uname -r)
+```
+
 `DriverTarget` declares the kernel driver as the build target. `DriverTarget`
 supports keywords:
 * `INCLUDE_DIR` - directory relative to which the target's header files will
@@ -290,7 +341,19 @@ supports keywords:
   header files and libraries of the compiled target;
 * `URL` - internet address or path to the archive with the target's source files;
 * `LIBRARIES` - list of libraries provided by the target;
-* `DEPENDS` - list of the target's dependencies.
+* `DEPENDS` - list of the target's dependencies;
+* `PATCHES` - list of patches.
+
+Example of creating patches:
+```
+$ diff -uNr ./orig_repo/ ./patched_repo/ > patch_name.patch
+$ git diff > patch_name.patch #For git repositories
+```
+
+Example of applying patches:
+```
+$ patch -p1 --dry-run < patch_name.patch
+```
 
 External project build target template:
 ```
@@ -301,6 +364,7 @@ ExternalTarget(<ext_name>
     INSTALL_COMMAND     <command>
     INSTALL_DIR     <directory>
     INCLUDE_DIR     <directory>
+    PATCHES     <list_of_pathes>
     LIBRARIES   <list_of_libraries>
     DEPENDS     <list_of_target_dependencies>
 )
@@ -317,12 +381,16 @@ ExternalTarget(testing
         cmake --build ./
     INSTALL_COMMAND
         cmake --install ./
+    PATCHES
+        ${CMAKE_SOURCE_DIR}/externals/patches/patch_example.patch
     INCLUDE_DIR
         ${EXTERNALS_PREFIX}/testing/install/include
     INSTALL_DIR
         ${EXTERNALS_PREFIX}/testing/install
 )
 ```
+
+#### Fetchs
 
 #### Wrappers
 
@@ -375,8 +443,6 @@ CustomTestTarget(ut_custom_test_target_with_args
     DISABLE
 )
 ```
-
-## Build
 
 ## ToDo
 

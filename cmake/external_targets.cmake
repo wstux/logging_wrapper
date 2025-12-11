@@ -23,6 +23,7 @@
 include(ExternalProject)
 
 include(build_utils)
+include(utils)
 
 ################################################################################
 # Setting of cmake policies
@@ -37,11 +38,20 @@ endif()
 # Constants
 ################################################################################
 
-set(EXTERNALS_PREFIX "${CMAKE_BINARY_DIR}/externals")
+set(EXTERNALS_PREFIX  "${CMAKE_BINARY_DIR}/externals")
+set(EXTERNALS_SRC_DIR "${CMAKE_SOURCE_DIR}/externals")
 
 ################################################################################
-# Utility functiona
+# Utility functions
 ################################################################################
+
+function(_get_lib_path LIB_PATH INSTALL_DIR LIB)
+    set(_lib_path   "${INSTALL_DIR}/lib/${LIB}")
+    if (LIB MATCHES "/")
+        set(_lib_path   "${INSTALL_DIR}/${LIB}")
+    endif()
+    set(${LIB_PATH} "${_lib_path}" PARENT_SCOPE)
+endfunction()
 
 function(_set_command VAR VALUE DFL_VALUE)
     set(${VAR} "${DFL_VALUE}" PARENT_SCOPE)
@@ -65,6 +75,7 @@ function(ExternalTarget EXT_TARGET_NAME)
     )
     set(_lists_kw   DEPENDS
                     LIBRARIES
+                    PATCHES
     )
     _parse_target_args_strings(${EXT_TARGET_NAME}
         _flags_kw _values_kw _lists_kw ${ARGN}
@@ -85,6 +96,15 @@ function(ExternalTarget EXT_TARGET_NAME)
 
     set(_depends "${${EXT_TARGET_NAME}_DEPENDS}")
 
+    set(_patch_cmd "true")
+    if (${EXT_TARGET_NAME}_PATCHES)
+        foreach (_patch IN LISTS ${EXT_TARGET_NAME}_PATCHES)
+            set(_patch_command  "bash -c \"patch -p1 --dry-run < ${_patch}\"\n")
+            file(APPEND ${_target_dir}/${_target_name}-prefix/patch_target.sh "${_patch_command}")
+        endforeach()
+        set(_patch_cmd bash ${_target_dir}/${_target_name}-prefix/patch_target.sh)
+    endif()
+
     ExternalProject_Add(${_target_name}
         PREFIX              ${_target_dir}
         STAMP_DIR           ${_target_dir}/stamp
@@ -96,27 +116,37 @@ function(ExternalTarget EXT_TARGET_NAME)
         INSTALL_COMMAND     ${_install_command}
         INSTALL_DIR         ${_install_dir}
         BUILD_COMMAND       ${_build_cmd}
-        DEPENDS ${_depends}
+        PATCH_COMMAND       ${_patch_cmd}
+        DEPENDS             ${_depends}
     )
 
     set(_libraries "")
     if (${EXT_TARGET_NAME}_LIBRARIES)
+        file(WRITE ${_target_dir}/${_target_name}-prefix/copy_libraries.sh "")
         foreach (_lib IN LISTS ${EXT_TARGET_NAME}_LIBRARIES)
-            set(_lib_path   "${_install_dir}/lib/${_lib}")
-            if (_lib MATCHES ".*\.so.*")
+            _get_lib_path(_lib_path "${_install_dir}" "${_lib}")
+
+            get_filename_component(_library_file ${_lib_path} NAME)
+            if (_lib MATCHES ".*\\.so.*")
+                #set(_cp_command "bash -c \"test -h ${_lib_path} && cp -af `readlink -f ${_lib_path}` ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${_library_file} || cp -a ${_lib_path} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${_library_file}\"\n")
                 set(_cp_command  "bash -c \"cp -a ${_lib_path} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/\"\n")
                 set(_cpl_command "bash -c \"test -h ${_lib_path} && cp -a `readlink -f ${_lib_path}` ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/ || true\"\n")
-            elseif (_lib MATCHES ".*\.a.*")
+            elseif (_lib MATCHES ".*\\.a.*")
                 set(_cp_command  "bash -c \"cp -a ${_lib_path} ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/\"\n")
+            else ()
+                continue()
             endif()
             file(APPEND ${_target_dir}/${_target_name}-prefix/copy_libraries.sh "${_cp_command}")
             file(APPEND ${_target_dir}/${_target_name}-prefix/copy_libraries.sh "${_cpl_command}")
 
-            if (_libraries)
-                set(_libraries "${_libraries}" "${_lib_path}")
-            else()
-                set(_libraries "${_lib_path}")
+            set(_output_lib_path)
+            if (_lib MATCHES ".*\\.so.*")
+                set(_output_lib_path "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${_library_file}")
+            elseif (_lib MATCHES ".*\\.a.*")
+                set(_output_lib_path "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${_library_file}")
             endif()
+
+            _append_to_list(_libraries "${_output_lib_path}")
         endforeach()
 
         ExternalProject_Add_Step(${EXT_TARGET_NAME} copy-libraries
@@ -127,11 +157,25 @@ function(ExternalTarget EXT_TARGET_NAME)
         )
     endif()
 
+    foreach (_dep IN LISTS _depends)
+        if (TARGET ${_dep})
+            get_target_property(_dep_include_dirs ${_dep} INCLUDE_DIRECTORIES)
+            if (_dep_include_dirs)
+                include_directories(${_dep_include_dirs})
+            endif()
+
+            #get_target_property(_dep_libraries ${_dep} LIBRARIES)
+            #if (_dep_libraries)
+            #    target_link_libraries(${EXT_TARGET_NAME} ${_dep_libraries})
+            #endif()
+        endif()
+    endforeach()
+
     set_target_properties(${EXT_TARGET_NAME} PROPERTIES
         INCLUDE_DIRECTORIES "${_include_dir}"
         IMPORTED_LOCATION   "${_libraries}"
         LIBRARIES           "${_libraries}"
-        INSTALL_DIR         "${install_dir}"
+        INSTALL_DIR         "${_install_dir}"
     )
 endfunction()
 
