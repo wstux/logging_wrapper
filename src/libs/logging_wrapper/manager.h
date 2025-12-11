@@ -230,7 +230,7 @@ public:
     /// \param  lvl - new severity level.
     static void set_global_level(severity_level lvl);
 
-    static void set_immutable() { m_is_immutable = true;}
+    static void set_immutable_global_level(severity_level lvl);
 
     /// \brief  Set the severity level for a specific channel.
     /// \param  channel - channel name.

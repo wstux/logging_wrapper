@@ -299,17 +299,19 @@ TEST_F(logging, immutable)
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
-
     EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::debug);
     EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::info));
 
-    ::wstux::logging::manager::set_immutable();
+    ::wstux::logging::manager::set_immutable_global_level(::wstux::logging::severity_level::warning);
 
     ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::crit);
     ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::crit);
+    EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::warning);
+    EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::crit));
 
-    EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::debug);
-    EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::info));
+    ::wstux::logging::manager::set_immutable_global_level(::wstux::logging::severity_level::debug);
+    EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::warning);
+
 }
 
 int main(int /*argc*/, char** /*argv*/)
