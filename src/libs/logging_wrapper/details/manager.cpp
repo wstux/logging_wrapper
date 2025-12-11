@@ -133,7 +133,7 @@ std::string manager::timestamp()
     char cur_ts[ts_size];
     timestamp(cur_ts, ts_size);
 
-	return std::string(cur_ts, ts_size - 1);
+    return std::string(cur_ts, ts_size - 1);
 }
 
 } // namespace logging
