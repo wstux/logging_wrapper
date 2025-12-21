@@ -95,6 +95,10 @@ void manager::set_immutable_global_level(severity_level lvl)
 
 void manager::set_logger_level(const std::string& channel, severity_level lvl)
 {
+    if ((lvl < severity_level::emerg) || (lvl > severity_level::trace)) {
+        return;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     logger_holder::map::iterator it = m_loggers_map.find(channel);
     if (it == m_loggers_map.end()) {
