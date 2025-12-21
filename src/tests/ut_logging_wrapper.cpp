@@ -125,6 +125,22 @@ TEST_F(logging_cpp, logging)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
+TEST_F(logging_cpp, same_loggers)
+{
+    using logger_t = ::wstux::logging::logger<test_logger>;
+
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    LOG_ERROR(root_logger, "error log " << 42);
+
+    logger_t logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    LOG_ERROR(logger, "error log " << 42);
+
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log 42\n"
+                                "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
+    const std::string log = root_logger.get_logger().str_logger.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
 TEST_F(logging_cpp, logging_specific)
 {
     using logger_t = ::wstux::logging::logger<test_specific_logger>;
@@ -156,6 +172,34 @@ TEST_F(logging_cpp, severity_level)
               "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     log = root_logger.get_logger().str_logger.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
+TEST_F(logging_cpp, invalid_severity_level)
+{
+    ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
+    EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::debug)
+        << "Current global level: " << ::wstux::logging::manager::global_level();
+
+    ::wstux::logging::manager::set_global_level(42);
+    EXPECT_TRUE(::wstux::logging::manager::global_level() == ::wstux::logging::severity_level::debug)
+        << "Current global level: " << ::wstux::logging::manager::global_level();
+}
+
+TEST_F(logging_cpp, invalid_logger_severity_level)
+{
+    using logger_t = ::wstux::logging::logger<test_logger>;
+
+    ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
+    ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level::info);
+
+    logger_t root_logger = ::wstux::logging::manager::get_logger<logger_t>("Root");
+    EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::info));
+
+    ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level(42));
+    EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::info));
+
+    ::wstux::logging::manager::set_logger_level("Root", ::wstux::logging::severity_level(-42));
+    EXPECT_TRUE(root_logger.can_log(::wstux::logging::severity_level::info));
 }
 
 TEST_F(logging_cpp, channels)

@@ -91,6 +91,11 @@ TEST_F(loggingf, logging)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
+TEST_F(loggingf, invalid_initialization_params)
+{
+    EXPECT_FALSE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 0, lw_severity_level_t::debug, NULL));
+}
+
 TEST_F(loggingf, logging_dynamic)
 {
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 1, lw_severity_level_t::debug, NULL));
@@ -106,7 +111,6 @@ TEST_F(loggingf, logging_dynamic)
 
 TEST_F(loggingf, severity_level)
 {
-    g_test_loggerf.clear();
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
     lw_loggerf_t root_logger = lw_get_logger("Root");
     ASSERT_TRUE(root_logger != nullptr);
@@ -123,6 +127,40 @@ TEST_F(loggingf, severity_level)
               "****-**-** **:**:**.*** [ERROR] Root: error log 42\n";
     log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
+TEST_F(loggingf, invalid_severity_level)
+{
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
+
+    lw_set_global_level(lw_severity_level_t::debug);
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::debug)
+        << "Current global level: " << lw_global_level();
+
+    lw_set_global_level(lw_severity_level_t(42));
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::debug) << "Current global level: " << lw_global_level();
+    EXPECT_FALSE(lw_can_log(42));
+
+    lw_set_global_level(lw_severity_level_t(-42));
+    EXPECT_TRUE(lw_global_level() == lw_severity_level_t::debug) << "Current global level: " << lw_global_level();
+    EXPECT_FALSE(lw_can_log(-42));
+}
+
+TEST_F(loggingf, invalid_logger_severity_level)
+{
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("Root");
+
+    lw_set_logger_level("Root", lw_severity_level_t::info);
+    EXPECT_TRUE(lw_can_channel_log(root_logger, lw_severity_level_t::info));
+
+    lw_set_logger_level("Root", lw_severity_level_t(42));
+    EXPECT_TRUE(lw_can_channel_log(root_logger, lw_severity_level_t::info));
+    EXPECT_FALSE(lw_can_channel_log(root_logger, 42));
+
+    lw_set_logger_level("Root", lw_severity_level_t(-42));
+    EXPECT_TRUE(lw_can_channel_log(root_logger, lw_severity_level_t::info));
+    EXPECT_FALSE(lw_can_channel_log(root_logger, -42));
 }
 
 TEST_F(loggingf, channels)
@@ -155,6 +193,26 @@ TEST_F(loggingf, channels)
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
+TEST_F(loggingf, long_channel_name)
+{
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 2, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("123456789012345");
+    lw_loggerf_t chan_logger = lw_get_logger("12345678901234567890");
+    lw_set_global_level(lw_severity_level_t::debug);
+
+    lw_set_logger_level("1234567890123456", lw_severity_level_t::info);
+    lw_set_logger_level("12345678901234567890", lw_severity_level_t::error);
+    LOGF_INFO(root_logger, "info log %d", 42);
+    LOGF_INFO(chan_logger, "info log %d", 42);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
+
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] 123456789012345: error log 42\n"
+                                "****-**-** **:**:**.*** [ERROR] 123456789012345: error log 42\n";
+    const std::string log = g_test_loggerf.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
 TEST_F(loggingf, channels_dynamic)
 {
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 2, lw_severity_level_t::crit, NULL));
@@ -181,6 +239,26 @@ TEST_F(loggingf, channels_dynamic)
                                 "****-**-** **:**:**.*** [ERROR] Channel: error log 42\n"
                                 "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n"
                                 "****-**-** **:**:**.*** [CRIT ] Channel: crit log 42\n";
+    const std::string log = g_test_loggerf.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
+TEST_F(loggingf, long_channel_name_dynamic)
+{
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 2, lw_severity_level_t::crit, NULL));
+    lw_loggerf_t root_logger = lw_get_logger("123456789012345");
+    lw_loggerf_t chan_logger = lw_get_logger("12345678901234567890");
+    lw_set_global_level(lw_severity_level_t::debug);
+
+    lw_set_logger_level("1234567890123456", lw_severity_level_t::info);
+    lw_set_logger_level("12345678901234567890", lw_severity_level_t::error);
+    LOGF_INFO(root_logger, "info log %d", 42);
+    LOGF_INFO(chan_logger, "info log %d", 42);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_ERROR(chan_logger, "error log %d", 42);
+
+    const std::string ethalon = "****-**-** **:**:**.*** [ERROR] 123456789012345: error log 42\n"
+                                "****-**-** **:**:**.*** [ERROR] 123456789012345: error log 42\n";
     const std::string log = g_test_loggerf.str();
     EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
