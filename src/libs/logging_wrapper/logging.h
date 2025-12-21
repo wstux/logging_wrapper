@@ -183,4 +183,3 @@
 #define LOG_TRACE(logger, VARS)             _LOG(logger, LVL_TRACE,  VARS)
 
 #endif /* _LIBS_LOGGING_WRAPPER_LOGGING_H_ */
-

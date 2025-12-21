@@ -1,4 +1,4 @@
-ExecTarget(logging_boost STATIC
+ExampleTarget(logging_boost
     SOURCES
         main.cpp
     LIBRARIES
@@ -9,4 +9,3 @@ ExecTarget(logging_boost STATIC
         boost
         pthread
 )
-

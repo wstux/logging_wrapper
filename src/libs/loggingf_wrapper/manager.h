@@ -107,4 +107,3 @@ int lw_timestamp(char* buf, size_t size);
 #endif
 
 #endif /* _LIBS_LOGGINGF_WRAPPER_MANAGER_H_ */
-

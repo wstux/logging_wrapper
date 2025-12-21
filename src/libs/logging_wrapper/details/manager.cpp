@@ -146,4 +146,3 @@ std::string manager::timestamp()
 } // namespace wstux
 
 #undef TS_FILL_DFL
-

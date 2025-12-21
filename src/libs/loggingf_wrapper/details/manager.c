@@ -368,4 +368,3 @@ int lw_timestamp(char* buf, size_t size)
 }
 
 #undef _TS_FILL_DFL
-

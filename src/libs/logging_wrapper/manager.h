@@ -334,4 +334,3 @@ TLogger manager::get_logger_dfl(const std::string& channel, severity_level lvl)
 } // namespace wstux
 
 #endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
-

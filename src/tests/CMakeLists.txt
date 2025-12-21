@@ -35,4 +35,3 @@ TestTarget(ut_custom_loggerf
     DEPENDS
         testing
 )
-

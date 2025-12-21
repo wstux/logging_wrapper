@@ -7,4 +7,3 @@ LibTarget(loggingf_wrapper STATIC
         details/manager.c
     LINKER_LANGUAGE C
 )
-
