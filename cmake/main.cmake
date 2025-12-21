@@ -64,17 +64,18 @@ include(CMakeDependentOption)
 include(build_flags)
 
 set(PROJECT_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
-string(TOLOWER ${PROJECT_BUILD_TYPE} PROJECT_BUILD_TYPE)
-string(TOUPPER ${PROJECT_BUILD_TYPE} _build_type)
+set(_build_type "${PROJECT_BUILD_TYPE}")
+if (PROJECT_BUILD_TYPE)
+    string(TOLOWER ${PROJECT_BUILD_TYPE} PROJECT_BUILD_TYPE)
+    string(TOUPPER ${PROJECT_BUILD_TYPE} _build_type)
+endif()
 
 if(CMAKE_C_COMPILER)
     message(STATUS "[INFO ] C compiler flags: '${CMAKE_C_FLAGS}'")
 
-    if(NOT PROJECT_BUILD_TYPE STREQUAL "debug" AND NOT PROJECT_BUILD_TYPE STREQUAL "release")
-        message(FATAL_ERROR "[ERROR] Unsupported C build type '${PROJECT_BUILD_TYPE}'")
+    if(PROJECT_BUILD_TYPE STREQUAL "debug" OR PROJECT_BUILD_TYPE STREQUAL "release")
+        message(STATUS "[INFO ] C ${PROJECT_BUILD_TYPE} compiler flags: '${CMAKE_C_FLAGS_${_build_type}}'")
     endif()
-
-    message(STATUS "[INFO ] C ${PROJECT_BUILD_TYPE} compiler flags: '${CMAKE_C_FLAGS_${_build_type}}'")
 
 #    if(PROJECT_BUILD_TYPE STREQUAL "relwithdebinfo")
 #        message(STATUS "[INFO ] C rel_with_deb_info compiler flags: '${CMAKE_C_FLAGS_RELWITHDEBINFO}'")
@@ -86,11 +87,9 @@ endif()
 if(CMAKE_CXX_COMPILER)
     message(STATUS "[INFO ] C++ compiler flags: '${CMAKE_CXX_FLAGS}'")
 
-    if(NOT PROJECT_BUILD_TYPE STREQUAL "debug" AND NOT PROJECT_BUILD_TYPE STREQUAL "release")
-        message(FATAL_ERROR "[ERROR] Unsupported C++ build type '${PROJECT_BUILD_TYPE}'")
+    if(PROJECT_BUILD_TYPE STREQUAL "debug" OR PROJECT_BUILD_TYPE STREQUAL "release")
+        message(STATUS "[INFO ] C++ ${PROJECT_BUILD_TYPE} compiler flags: '${CMAKE_C_FLAGS_${_build_type}}'")
     endif()
-
-    message(STATUS "[INFO ] C++ ${PROJECT_BUILD_TYPE} compiler flags: '${CMAKE_C_FLAGS_${_build_type}}'")
 
 #    if(PROJECT_BUILD_TYPE STREQUAL "relwithdebinfo")
 #        message(STATUS "[INFO ] C++ rel_with_deb_info compiler flags: '${CMAKE_CXX_FLAGS_RELWITHDEBINFO}'")
