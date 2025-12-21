@@ -313,6 +313,9 @@ void lw_set_global_level(lw_severity_level_t lvl)
 {
     assert(g_p_manager != NULL && "Logging manager is not initialized");
     if (! g_p_manager->is_immutable) {
+        if ((lvl < emerg) || (lvl > trace)) {
+            return;
+        }
         g_p_manager->global_lvl = lvl;
     }
 }
@@ -332,6 +335,9 @@ void lw_set_logger_level(const char* channel, lw_severity_level_t lvl)
 
     _lw_loggerf_t* p_logger = g_p_manager->get_logger_fn(channel);
     if (p_logger != NULL) {
+        if ((lvl < emerg) || (lvl > trace)) {
+            return;
+        }
         p_logger->level = lvl;
     }
 }
