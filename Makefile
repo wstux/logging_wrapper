@@ -30,7 +30,7 @@ endef
 define coverage_rule
 
 build_$(1)/Makefile:
-	@mkdir -p $$(@D) && cd $$(@D) && cmake -DCMAKE_BUILD_TYPE="debug" -DCOVERAGE=ON  ../
+	@mkdir -p $$(@D) && cd $$(@D) && cmake -DCMAKE_BUILD_TYPE="debug" -DCOVERAGE_BUILD=ON -DBUILD_TESTS=ON ../
 
 $(1)/%: build_$(1)/Makefile
 	@make -j $(NJOB) --output-sync=target --no-print-directory -C build_$(1) $$*

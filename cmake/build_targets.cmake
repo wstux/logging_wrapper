@@ -179,6 +179,10 @@ endmacro()
 # LINKER_LANGUAGE
 # COMPILE_DEFINITIONS
 macro(TestTarget TARGET_NAME)
+    if (NOT BUILD_TESTS)
+        return()
+    endif()
+
     set(_flags_kw   DISABLE)
     set(_values_kw  COMMENT INCLUDE_DIR LINKER_LANGUAGE)
     set(_lists_kw   HEADERS SOURCES LIBRARIES DEPENDS COMPILE_DEFINITIONS)
@@ -220,4 +224,3 @@ macro(TestTarget TARGET_NAME)
         RUNTIME_OUTPUT_DIRECTORY "${_target_dir}"
     )
 endmacro()
-
