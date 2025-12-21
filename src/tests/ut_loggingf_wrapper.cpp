@@ -83,7 +83,7 @@ TEST_F(loggingf, logging)
 {
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::debug, NULL));
     lw_loggerf_t root_logger = lw_get_logger("Root");
-    EXPECT_TRUE(root_logger != nullptr);
+    ASSERT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
@@ -95,7 +95,7 @@ TEST_F(loggingf, logging_dynamic)
 {
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::dynamic_size, 1, lw_severity_level_t::debug, NULL));
     lw_loggerf_t root_logger = lw_get_logger("Root");
-    EXPECT_TRUE(root_logger != nullptr);
+    ASSERT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log, %d", 42);
 
     const std::string ethalon = "****-**-** **:**:**.*** [ERROR] Root: error log, 42\n";
@@ -109,7 +109,7 @@ TEST_F(loggingf, severity_level)
     g_test_loggerf.clear();
     EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::crit, NULL));
     lw_loggerf_t root_logger = lw_get_logger("Root");
-    EXPECT_TRUE(root_logger != nullptr);
+    ASSERT_TRUE(root_logger != nullptr);
     LOGF_ERROR(root_logger, "error log %d", 42);
     LOGF_CRIT(root_logger, "crit log %d", 42);
 
@@ -267,6 +267,24 @@ TEST_F(loggingf, immutable)
     lw_set_global_level(lw_severity_level_t::debug);
     EXPECT_TRUE(lw_global_level() == lw_severity_level_t::warning);
 
+}
+
+TEST_F(loggingf, default_severity_level)
+{
+    g_test_loggerf.clear();
+    EXPECT_TRUE(lw_init_logging(log_fn, lw_logging_policy_t::fixed_size, 1, lw_severity_level_t::trace, NULL));
+    lw_loggerf_t root_logger = lw_get_logger_dfl("Root", lw_severity_level_t::crit);
+    ASSERT_TRUE(root_logger != nullptr);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_CRIT(root_logger, "crit log %d", 42);
+
+    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
+    std::string log = g_test_loggerf.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+
+    ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
+    log = g_test_loggerf.str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
 }
 
 int main(int /*argc*/, char** /*argv*/)

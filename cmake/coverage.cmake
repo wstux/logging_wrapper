@@ -22,8 +22,7 @@
 
 include(custom_targets)
 
-set(COVERAGE_FLAGS)
-if (COVERAGE)
+if (COVERAGE_BUILD)
     if(NOT CMAKE_BUILD_TYPE STREQUAL "debug")
         message(FATAL_ERROR "Code coverage supports only debug build")
     endif()

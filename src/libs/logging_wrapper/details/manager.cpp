@@ -51,6 +51,8 @@ void manager::deinit()
 {
     std::lock_guard<std::recursive_mutex> lock(m_loggers_mutex);
     m_loggers_map.erase(m_loggers_map.begin(), m_loggers_map.end());
+    m_global_level = severity_level::warning;
+    m_is_immutable = false;
 }
 
 void manager::init(severity_level global_lvl, init_fn_t init_fn)

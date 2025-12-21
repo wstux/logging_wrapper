@@ -314,6 +314,20 @@ TEST_F(logging, immutable)
 
 }
 
+TEST_F(loggingf, default_severity_level)
+{
+    using logger_t = ::wstux::logging::logger<test_loggerf>;
+
+    ::wstux::logging::manager::set_global_level(::wstux::logging::severity_level::debug);
+    logger_t root_logger = ::wstux::logging::manager::get_logger_dfl<logger_t>("Root", ::wstux::logging::severity_level::crit);
+    LOGF_ERROR(root_logger, "error log %d", 42);
+    LOGF_CRIT(root_logger, "crit log %d", 42);
+
+    std::string ethalon = "****-**-** **:**:**.*** [CRIT ] Root: crit log 42\n";
+    std::string log = root_logger.get_logger().str();
+    EXPECT_TRUE(is_equal_logs(ethalon, log)) << "'" << ethalon << "' != '" << log << "'";
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
     return RUN_ALL_TESTS();

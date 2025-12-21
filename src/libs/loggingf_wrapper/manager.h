@@ -39,7 +39,7 @@ enum lw_logging_policy
     fixed_size
 };
 
-typedef int	(*lw_loggerf_fn_t)(const char*, ...);
+typedef int (*lw_loggerf_fn_t)(const char*, ...);
 typedef enum lw_logging_policy      lw_logging_policy_t;
 typedef enum lw_severity_level      lw_severity_level_t;
 
@@ -53,10 +53,27 @@ struct lw_loggerf
 typedef const struct lw_loggerf*    lw_loggerf_t;
 
 bool lw_can_log(int lvl);
-
+/// \brief  Set the global severity level loggers.
+    /// \param  channel - channel name.
+    /// \param  lvl - new severity level.
 bool lw_can_channel_log(lw_loggerf_t p_logger, int lvl);
 
+/**
+ *  \brief  Logger request.
+ *  \param  channel - channel name.
+ *  \return An existing logger of the specified type. If the logger did not
+ *      exist, it will be created.
+ */
 lw_loggerf_t lw_get_logger(const char* channel);
+
+/**
+ *  \brief  Logger request with default severity level.
+ *  \param  channel - channel name.
+ *  \param  dfl_lvl - default severity level that will be set.
+ *  \return An existing logger of the specified type. If the logger did not
+ *      exist, it will be created.
+ */
+lw_loggerf_t lw_get_logger_dfl(const char* channel, lw_severity_level_t dfl_lvl);
 
 lw_severity_level_t lw_global_level(void);
 
@@ -67,10 +84,20 @@ bool lw_deinit_logging(void);
 
 lw_loggerf_t lw_root_logger(void);
 
+/**
+ *  \brief  Set the global severity level loggers.
+ *  \param  channel - channel name.
+ *  \param  lvl - new severity level.
+ */
 void lw_set_global_level(lw_severity_level_t lvl);
 
 void lw_set_immutable_global_level(lw_severity_level_t lvl);
 
+/**
+ *  \brief  Set the severity level for a specific channel.
+ *  \param  channel - channel name.
+ *  \param  lvl - new severity level.
+ */
 void lw_set_logger_level(const char* channel, lw_severity_level_t lvl);
 
 int lw_timestamp(char* buf, size_t size);
