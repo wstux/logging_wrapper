@@ -131,8 +131,6 @@ struct logger_impl final : public base_logger
     /// \param  lvl - new logging level.
 } // namespace details
 
-class manager;
-
 ////////////////////////////////////////////////////////////////////////////////
 // struct logger
 
@@ -167,8 +165,6 @@ class manager;
 template<typename TLogger>
 struct logger final
 {
-    friend manager;
-
     using logger_impl_t = details::logger_impl<TLogger>;
     using logger_type = TLogger;
 
@@ -180,7 +176,6 @@ struct logger final
 
     typename logger_impl_t::ptr p_logger_impl;
 
-private:
     /// \brief  Private constructor so that the class can only be created via
     ///         ::wstux::logging::manager.
     explicit logger(typename logger_impl_t::ptr p_logger)
@@ -339,4 +334,3 @@ TLogger manager::get_logger_dfl(const std::string& channel, severity_level lvl)
 } // namespace wstux
 
 #endif /* _LIBS_LOGGING_WRAPPER_MANAGER_H_ */
-

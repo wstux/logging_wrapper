@@ -1,0 +1,2 @@
+add_subdirectory(logging_wrapper)
+add_subdirectory(loggingf_wrapper)

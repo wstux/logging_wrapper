@@ -1,7 +1,6 @@
-ExecTarget(logging_printf STATIC
+ExampleTarget(logging_printf
     SOURCES
         main.cpp
     LIBRARIES
         logging_wrapper
 )
-

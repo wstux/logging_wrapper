@@ -100,4 +100,3 @@
 #define LOGF_TRACE(logger, fmt, ...)        _LOGF(logger, LVL_TRACE,  fmt, __VA_ARGS__)
 
 #endif /* _LIBS_LOGGINGF_WRAPPER_LOGGING_H_ */
-

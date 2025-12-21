@@ -6,4 +6,3 @@ LibTarget(logging_wrapper STATIC
     SOURCES
         details/manager.cpp
 )
-
