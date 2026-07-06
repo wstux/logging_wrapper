@@ -1,0 +1,9 @@
+ExampleTarget(logging_quill
+    SOURCES
+        main.cpp
+    LIBRARIES
+        logging_wrapper
+    DEPENDS
+        quill
+        pthread
+)

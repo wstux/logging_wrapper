@@ -20,6 +20,28 @@ if (BUILD_EXAMPLES)
             libboost_log_setup-mt-x64.so
             libboost_thread-mt-x64.so
     )
+
+    ExternalTarget(quill
+        URL
+            https://github.com/odygrd/quill/archive/refs/tags/v12.0.0.tar.gz
+        CONFIGURE_COMMAND
+            ${CMAKE_COMMAND} ./
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                -DCMAKE_INSTALL_PREFIX=${EXTERNALS_PREFIX}/quill/install
+                -DQUILL_ENABLE_INSTALL=ON
+                -DQUILL_BUILD_TESTS=OFF
+                -DQUILL_BUILD_EXAMPLES=OFF
+        INCLUDE_DIR
+            ${EXTERNALS_PREFIX}/quill/install/include
+        INSTALL_DIR
+            ${EXTERNALS_PREFIX}/quill/install
+        #BUILD_COMMAND
+        #    ${CMAKE_COMMAND} --build ./ --config ${CMAKE_BUILD_TYPE}
+        #INSTALL_COMMAND
+        #    ${CMAKE_COMMAND} --install ./ --config ${CMAKE_BUILD_TYPE}
+        #LIBRARIES
+        #    libquill.a
+    )
 endif()
 
 if (BUILD_TESTS)
