@@ -1,0 +1,35 @@
+/**
+ *  \page   tests_page Verification and testing
+ *  \tableofcontents
+ *
+ *
+ *
+ *  \section    test_overview Coverage overview
+ *  All key system components are covered by unit tests using the Google Test framework.
+ *  The tests are divided into logical subsystems:
+ *
+ *  - \ref logging_tests "Logging component tests"
+ *  - Detailed flat list of all project test cases: **[Test List](\ref test)**
+ *
+ *
+ *
+ *  \section    test_run Build and run tests
+ *  Building and running tests are performed in a standard manner via CTest or
+ *  by directly executing the test binary:
+ *
+ *  \code{.sh}
+ *  # Build the project and run tests
+ *  make debug/test
+ *
+ *  # Run tests and generate an XML report
+ *  ./build_debug/test/ut_logging_wrapper --gtest_output=xml:report.xml
+ *  \endcode
+ */
+/**
+ *  \defgroup   logging_wrapper_tests Logging wrapper library unit tests
+ *  \brief  This section contains the documentation for the system's unit tests.
+ */
+/**
+ *  \defgroup   loggingf_wrapper_tests Loggingf wrapper library unit tests
+ *  \brief  This section contains the documentation for the system's unit tests.
+ */

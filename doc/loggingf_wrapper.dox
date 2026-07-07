@@ -1,0 +1,14 @@
+/**
+ *  \page   loggingf_wrapper_page C logging wrapper library
+ *  \tableofcontents
+ *
+ *  \section    loggingf_wrapper_intro Introduction
+ *
+ *  \section    loggingf_wrapper_api Key components
+ *
+ *  \ref    loggingf_wrapper_module "Go to the complete C logging wrapper library API list"
+ */
+/**
+ *  \defgroup   loggingf_wrapper_module C logging wrapper library API (loggingf_wrapper)
+ *  \brief  Components related to the C logging wrapper library.
+ */
