@@ -6,7 +6,7 @@ TestTarget(ut_logging_wrapper
     LIBRARIES
         logging_wrapper
     DEPENDS
-        testing
+        googletest
 )
 
 TestTarget(ut_custom_logger
@@ -15,7 +15,7 @@ TestTarget(ut_custom_logger
     LIBRARIES
         logging_wrapper
     DEPENDS
-        testing
+        googletest
 )
 
 TestTarget(ut_loggingf_wrapper
@@ -24,7 +24,7 @@ TestTarget(ut_loggingf_wrapper
     LIBRARIES
         loggingf_wrapper
     DEPENDS
-        testing
+        googletest
 )
 
 TestTarget(ut_custom_loggerf
@@ -33,5 +33,5 @@ TestTarget(ut_custom_loggerf
     LIBRARIES
         loggingf_wrapper
     DEPENDS
-        testing
+        googletest
 )

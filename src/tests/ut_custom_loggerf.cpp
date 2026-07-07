@@ -15,6 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ *  \file
+ *  \brief  Custom logger for loggingf wrapper unit tests.
+ *  \ingroup    loggingf_wrapper_tests
+ */
 
 #include <cstdarg>
 #include <cstdio>
@@ -22,7 +27,7 @@
 #include <limits>
 #include <sstream>
 
-#include <testing/testdefs.h>
+#include <gtest/gtest.h>
 
 #define LOGGINGF_WRAPPER_IMPL(logger, level, fmt, ...)              \
     logger->p_logger(LOGF_LEVEL(level) " %s: " fmt "\n",            \
@@ -236,7 +241,12 @@ TEST_F(loggingf, channels_dynamic_hash)
     EXPECT_TRUE(ethalon == log) << "'" << ethalon << "' != '" << log << "'";
 }
 
-int main(int /*argc*/, char** /*argv*/)
+/**
+ *  \internal
+ *  \brief  Main function.
+ */
+int main(int argc, char** argv)
 {
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

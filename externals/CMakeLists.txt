@@ -37,27 +37,30 @@ if (BUILD_EXAMPLES)
             ${EXTERNALS_PREFIX}/quill/install
         #BUILD_COMMAND
         #    ${CMAKE_COMMAND} --build ./ --config ${CMAKE_BUILD_TYPE}
-        #INSTALL_COMMAND
-        #    ${CMAKE_COMMAND} --install ./ --config ${CMAKE_BUILD_TYPE}
+        INSTALL_COMMAND
+            ${CMAKE_COMMAND} --install ./ --config ${CMAKE_BUILD_TYPE}
         #LIBRARIES
         #    libquill.a
     )
 endif()
 
 if (BUILD_TESTS)
-    ExternalTarget(testing
-        URL
-            https://github.com/wstux/testing_template/archive/refs/heads/master.zip
-        #URL_MD5
-        #    fe33be48eeb6de4dc2fefe60a3834c1f
+    ExternalTarget(googletest
+        VERSION "1.17.0"
+        URL     https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
         CONFIGURE_COMMAND
-            cmake --install-prefix ${EXTERNALS_PREFIX}/testing/install  ./
+            cmake --install-prefix ${EXTERNALS_PREFIX}/googletest/install ./
         BUILD_COMMAND
             cmake --build ./ && cmake --install ./
         INCLUDE_DIR
-            ${EXTERNALS_PREFIX}/testing/install/include
+            ${EXTERNALS_PREFIX}/googletest/install/include
         INSTALL_DIR
-            ${EXTERNALS_PREFIX}/testing/install
+            ${EXTERNALS_PREFIX}/googletest/install
+        LIBRARIES
+            libgmock.a
+            libgmock_main.a
+            libgtest.a
+            libgtest_main.a
     )
 endif()
 
