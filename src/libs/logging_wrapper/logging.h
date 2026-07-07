@@ -320,9 +320,9 @@
 /** \}*/
 
 /**
- *  \defgroup   StructuredLogging Structured Logging API (Key-Value)
+ *  \defgroup   StreamedLogging Streamed Logging API (Key-Value)
  *  \brief  Macros for recording log messages of various severity levels. Macros
- *      that accept a list of variables or structured arguments.
+ *      that accept a list of variables or streamed arguments.
  *
  * **List of logging macros:**
  * - \ref LOG_EMERG()   - critical system error (Emergency)
