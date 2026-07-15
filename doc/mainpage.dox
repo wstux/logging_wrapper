@@ -1,0 +1,240 @@
+/**
+ *  \mainpage   General description of the logging wrapper architecture
+ *
+ *
+ *
+ *  \section intro_sec Introduction
+ *  Provides a high-performance, thread-safe, and flexible logging subsystem for
+ *  С and C++ applications. The library abstracts specific logger implementations
+ *  (utilizing the "Adapter" pattern) and ensuresfast, two-level message filtering
+ *  by severity levels before string formatting takes place.
+ *
+ *
+ *  \subsection features_sec Key features
+ *  - **Two-level threshold:** A global filtering level is combined with an
+ *      individual level for each channel.
+ *  - **Immutability:** Ability to freeze the global log level with no right to
+ *      change it at runtime (`set_immutable_global_level`).
+ *  - **Thread safety:** Logger registration is protected by a mutex. Runtime
+ *      level checking is performed via atomic variables, which eliminates locks
+ *      during frequent writing.
+ *  - **Two syntax styles:** The C++ manager implementation supports both stream
+ *      output (std::ostream style) and classical formatting style (printf style).
+ *
+ *
+ *
+ *  \section    logger_desc Logger entity overview
+ *  The logger is an atomic element of the logging subsystem. It represents a
+ *  named context (channel) that binds a specific software module to the common
+ *  output backend and an individual severity level.
+ *
+ *  Unlike the global manager that controls the entire system, the logger is
+ *  exclusively responsible for filtering messages within its own logical
+ *  domain (channel).
+ *
+ *
+ *  \subsection logger_lifecycle Logger instance lifecycle
+ *  1. **Creation/Allocation:** The logger is created by the manager when
+ *      get_logger is called.
+ *  2. **Initialization:** Upon creation, the logger copies the pointer to the
+ *      output backend, receives the channel name, and sets the initial severity
+ *      level.
+ *  3. **Usage:** The logger is passed to the `LOG_*` or `LOGF_*` family of macros.
+ *      Its internal runtime state is read-only, except for thread-safe changes
+ *      to its level.
+ *  4. **Destruction:** The logger's resources are released centrally during the
+ *      deinitialization of the logging manager.
+ *
+ *
+ *  \subsection logger_pipeline Message processing pipeline
+ *  When any logging macro is invoked (for example, `LOGF_INFO(logger, "msg")`),
+ *  the message goes through a strict three-stage filter:
+ *
+ *  \code
+ *  [LOGF_XXX Invocation]
+ *          │
+ *  [Stage 1: Global Filter] --> (Log level disabled globally?) --> [EXIT (Arguments not evaluated)]
+ *          │ No
+ *  [Stage 2: Channel Filter] --> (Log level disabled for channel?) --> [EXIT (Arguments not evaluated)]
+ *          │ No
+ *  [Stage 3: Evaluation & Output] --> Evaluate parameters --> Output Driver
+ *  \endcode
+ *
+ *  \note **Important:** The evaluation of formatting arguments (e.g., function
+ *      calls inside log parameters) takes place *strictly at Stage 3*. If the
+ *      logger is disabled at Stage 1 or Stage 2, zero overhead is incurred from
+ *      parsing arguments.
+ *
+ *
+ *
+ *  \section    macros_overview Interface overview
+ *  The `LOG_*` and `LOGF_*` macro interface serves as the sole public layer
+ *  through which the application's business logic interacts with the logging
+ *  subsystem. Each macro is strictly tied to a specific severity level and
+ *  encapsulates the context verification logic within itself.
+ *
+ *
+ *  \subsection macro_group_sec List of logging macros
+ *  For ease of navigation, all available macros are divided into two groups:
+ *  - Stream macros (`LOG_*`): accept `VARS` as a chain of `<< item1 << item2`.
+ *  - Formatting macros (`LOGF_*`): accept a format string and `__VA_ARGS__` parameters.
+ *
+ *  The library provides a set of logging levels (in descending order of severity):
+ *  - `emerg`  - the system is unusable;
+ *  - `fatal`  - actions that must be taken care of immediately;
+ *  - `crit`   - critical conditions;
+ *  - `error`  - non-critical error conditions;
+ *  - `warn`   - warning conditions that should be taken care of;
+ *  - `notice` - normal, but significant events;
+ *  - `info`   - informational messages that require no action;
+ *  - `debug`  - debugging messages, output if the developer enabled debugging at compile time;
+ *  - `trace`  - the most detailed level of logging within the spectrum of log levels that developers can use.
+ *
+ *
+ *  \subsection macros_early_exit Lazy evaluation mechanism
+ *  The primary objective of the library's macros is to minimize CPU overhead.
+ *  Traditional logging functions (such as a custom `printf`) evaluate their
+ *  arguments *before* control is passed into the function where the log level
+ *  is checked.
+ *
+ *  These macros utilize the `do { ... } while(0)` construct and conditional
+ *  `break` statements. This inlines the level checking directly at the call site:
+ *  - If a message is filtered out, execution of the block terminates instantly.
+ *  - The compiler fully optimizes this step, reducing it to just a few assembly
+ *      branch instructions.
+ *  - Heavy format string parsing and the evaluation of logging arguments are
+ *      skipped entirely.
+ *
+ *
+ *  \subsection macros_pitfalls Important warning: Side Effects
+ *  Due to the lazy nature of the evaluation, macro arguments might
+ *  **not be evaluated at all** during program execution.
+ *  \warning    It is strictly forbidden to pass parameters to the logging macros
+ *  that modify the application state (i.e., parameters with side effects).
+ *
+ *  \b Incorrect \b Code:
+ *  \code{.c}
+ *  // If the DEBUG level is disabled, the transaction will never close!
+ *  LOGF_DEBUG(logger, "Closure status: %d", close_transaction(tx_id));
+ *  \endcode
+ *
+ *  \b Correct \b Code:
+ *  \code{.c}
+ *  int res = close_transaction(tx_id);
+ *  LOGF_DEBUG(logger, "Closure status: %d", res);
+ *  \endcode
+ *  \}
+ *
+ *
+ *
+ *  \section    usage_sec Usage examples
+ *
+ *
+ *  \subsection init_subsec 1. Subsystem initialization
+ *  Initialization is performed once at application startup (for example, in `main`):
+ *  \code{.cpp}
+ *  #include <wstux/logging_wrapper/logging.h>
+ *
+ *  int main()
+ *  {
+ *      // Initialization: WARNING level by default, empty backend configuration function
+ *      wstux::logging::manager::init(severity_level::warning, []() {
+ *          // Configuration of third-party logging libraries, if applicable
+ *      });
+ *
+ *      // Changing the level
+ *      wstux::logging::manager::set_global_level(severity_level::debug);
+ *
+ *      // ... application execution ...
+ *
+ *      wstux::logging::manager::deinit();
+ *      return 0;
+ *  }
+ *  \endcode
+ *
+ *
+ *  \subsection create_logger_subsec 2. Creating and retrieving a logger
+ *  Loggers are bound to string-based channels. Creating strongly-typed loggers
+ *  is supported:
+ *  \b Option \b A: Using C++ wrapper:
+ *  \code{.cpp}
+ *  #include <iostream>
+ *  #include <wstux/logging_wrapper/logging.h>
+ *
+ *  struct clog_logger final
+ *  {
+ *      template <typename T>
+ *      inline std::ostream& operator<<(const T& val) { return std::clog << val; }
+ *  };
+ *
+ *  namespace wstux { namespace logging {
+ *
+ *  template<> clog_logger make_logger<clog_logger>(const std::string&) { return clog_logger(); }
+ *
+ *  }}
+ *
+ *  // Assume clog_logger is one of the supported backends
+ *  using logger_t = ::wstux::logging::logger<clog_logger>;
+ *
+ *  void init_subsystems()
+ *  {
+ *      // Retrieving a logger for the network subsystem with a default level of INFO
+ *      logger_t net_loger = ::wstux::logging::manager::get_logger_dfl<logger_t>("Network", ::wstux::logging::severity_level::info);
+ *  }
+ *  \endcode
+ *
+ *  \b Option \b B: Using C wrapper:
+ *  \code{.c}
+ *  #include <stdio.h>
+ *  #include <wstux/loggingf_wrapper/logging.h>
+ *
+ *  // Custom logging callback
+ *  int backend_logger(const char* fmt, ...)
+ *  {
+ *      va_list args;
+ *      va_start(args, fmt);
+ *      int result = vprintf(fmt, args);
+ *      va_end(args);
+ *      return result;
+ *  }
+ *
+ *  int main(void)
+ *  {
+ *      // Retrieving a logger with a default level of INFO
+ *      if (! lw_init_logging(backend_logger, fixed_size, 10, LVL_INFO, NULL)) {
+ *          return -1;
+ *      }
+ *
+ *      lw_loggerf_t logger = lw_get_logger("Network");
+ *      LOGF_INFO(logger, "Connecting to the server %s:%d", "127.0.0.1", 8080);
+ *
+ *      // Using...
+ *
+ *      lw_deinit_logging();
+ *      return 0;
+ *  }
+ *  \endcode
+ *
+ *
+ *  \subsection logging_examples_subsec 3. Writing Logs (Macros)
+ *
+ *  \b Option \b A: Using formatted output (printf-style):
+ *  \code{.cpp}
+ *  logger_t logger = wstux::logging::manager::get_logger<logger_t>("Auth");
+ *
+ *  LOGF_INFO(logger, "User '%s' successfully logged in from IP %s", username.c_str(), ip_address.c_str());
+ *  LOGF_ERROR(logger, "Failed to open database connection. Error code: %d", err_code);
+ *  \endcode
+ *
+ *  \b Option \b B: Using stream output (stream-style):
+ *  \code{.cpp}
+ *  logger_t logger = wstux::logging::manager::get_logger<logger_t>("Storage");
+ *
+ *  LOG_DEBUG(logger, "Loading file: " << file_path << " Size: " << file_size << " bytes");
+ *  LOG_WARN(logger, "Low disk space on drive " << drive_letter);
+ *  \endcode
+ *
+ *  \note Expressions inside macros (e.g., string concatenation or function calls)
+ *  \b will \b not \b be \b evaluated if the logger filters out the message based
+ *  on its severity level. This is critical for performance.
+ */

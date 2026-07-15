@@ -1,0 +1,14 @@
+/**
+ *  \page   logging_wrapper_page C++ logging wrapper library
+ *  \tableofcontents
+ *
+ *  \section    logging_wrapper_intro Introduction
+ *
+ *  \section    logging_wrapper_api Key components
+ *
+ *  \ref    logging_wrapper_module "Go to the complete C++ logging wrapper library API list"
+ */
+/**
+ *  \defgroup   logging_wrapper_module C++ logging wrapper library API (logging_wrapper)
+ *  \brief  Components related to the C++ logging wrapper library.
+ */

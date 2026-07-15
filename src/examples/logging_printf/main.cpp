@@ -38,13 +38,12 @@ struct printf_logger final
     }
 };
 
-using clog_backend_t = printf_logger;
-using logger_t = ::wstux::logging::logger<clog_backend_t>;
+using logger_t = ::wstux::logging::logger<printf_logger>;
 
 namespace wstux {
 namespace logging {
 
-template<> clog_backend_t make_logger<clog_backend_t>(const std::string&) { return clog_backend_t(); }
+template<> printf_logger make_logger<printf_logger>(const std::string&) { return printf_logger(); }
 
 } // namespace logging
 } // namespace wstux
